@@ -2,7 +2,6 @@ package contextvh.translators;
 
 import eis.eis2java.exception.TranslationException;
 import eis.eis2java.translation.Java2Parameter;
-import eis.eis2java.translation.Translator;
 import eis.iilang.Function;
 import eis.iilang.Numeral;
 import eis.iilang.Parameter;
@@ -16,8 +15,6 @@ import nl.tytech.data.engine.serializable.UpgradePair;
  * @author M.Houtman
  */
 public class J2UpgradeType implements Java2Parameter<UpgradeType> {
-
-    private final Translator translator = Translator.getInstance();
 
     /**
      * Translates the UpgradeType object in the form of:

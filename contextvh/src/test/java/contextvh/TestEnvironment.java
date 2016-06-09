@@ -11,31 +11,44 @@ import tygronenv.EisEnv;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestEnvironment extends tygronenv.TestEnvironment{
+/**
+ * Tests the additional functionality in ContextEnv.
+ * @author Max Groenenboom
+ */
+public class TestEnvironment extends tygronenv.TestEnvironment {
 
-	private EisEnv env;
-    private static final String STAKEHOLDERS = "stakeholders";
+	private ContextEnv env;
+	private static final String STAKEHOLDERS = "stakeholders";
 
-    @Override
-    public EisEnv createEnvironment() {
-        env =  new ContextEnv();
-        return env;
-    }
+	@Override
+	public EisEnv createEnvironment() {
+		env =  new ContextEnv();
+		return env;
+	}
 
-    @After
+	/**
+	 * Method executed after each test.
+	 * @throws ManagementException Unexpected Exception.
+	 * @throws InterruptedException Unexpected Exception.
+	 */
+	@After
 	public void after() throws ManagementException, InterruptedException {
-        super.after();
+		super.after();
 		env.kill();
 		env = null;
 	}
 
+	/**
+	 * Tests if the environment can be correctly initiated.
+	 * @throws ManagementException Unexpected Exception.
+	 */
 	@Test
 	public void testAnotherOwnerConnect() throws ManagementException {
 		Map<String, Parameter> parameters = new HashMap<String, Parameter>();
-        String PROJECT = "project";
-        parameters.put(PROJECT, new Identifier("vhproject"));
-        // No stakeholders with a default name
-        parameters.put(STAKEHOLDERS, new ParameterList(new Identifier("TU")));
+		final String project = "project";
+		parameters.put(project, new Identifier("vhproject"));
+		// No stakeholders with a default name
+		parameters.put(STAKEHOLDERS, new ParameterList(new Identifier("TU")));
 		// any slot so not specified.
 		env.init(parameters);
 	}
