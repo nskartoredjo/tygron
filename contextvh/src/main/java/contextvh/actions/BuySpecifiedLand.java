@@ -24,7 +24,7 @@ import nl.tytech.data.engine.item.Zone;
 import nl.tytech.util.JTSUtils;
 import nl.tytech.util.logger.TLogger;
 
-public class SellSpecifiedLand implements CustomAction {
+public class BuySpecifiedLand implements CustomAction {
 
 	
 	// sell_specified_land(stackholderId, zone, min area, max area)

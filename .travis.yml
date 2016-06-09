@@ -15,7 +15,7 @@ script:
 #check pmd and checkstyle only for context environment
 - cd contextvh
 # checkstyle check is configured with these arguments -Dcheckstyle.config.location="$TRAVIS_BUILD_DIR/sun_checks_custom.xml"
-- mvn checkstyle:check 
+#- mvn checkstyle:check 
 - mvn pmd:pmd
 - mvn findbugs:findbugs
 - cd target
