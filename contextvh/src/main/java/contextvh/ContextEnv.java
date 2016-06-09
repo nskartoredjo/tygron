@@ -40,6 +40,7 @@ import java.util.LinkedList;
  * @author Stefan Breetveld
  */
 public class ContextEnv extends EisEnv {
+	private static final long serialVersionUID = 2795668071082192962L;
 
     private Java2Parameter<?>[] j2p = new Java2Parameter<?>[] {new J2ClientItemMap(), new ContextJ2Stakeholder(),
             new J2Setting(), new J2Function(), new J2Category(), new ContextJ2Building(), new J2TimeState(),
@@ -67,27 +68,26 @@ public class ContextEnv extends EisEnv {
     }
 
     @Override
-    protected boolean isSupportedByEntity(final Action action, final String entity) {
-        return getEntity(entity).isSupported(action);
+    protected boolean isSupportedByEntity(final Action action, final String ent) {
+        return getEntity(ent).isSupported(action);
     }
 
     /**
      * Perform action for a given entity, possibly return a {@link Percept}.
      *
-     * @param entity the entity to perform this {@link Action}.
+     * @param ent the entity to perform this {@link Action}.
      * @param action the {@link Action} to perform.
      * @return returns a {@link Percept} if the {@link Action} returns one.
      * @throws ActException thrown if the action failed to execute
      */
     @Override
-    protected Percept performEntityAction(final String entity,
+    protected Percept performEntityAction(final String ent,
                                           final Action action) throws ActException {
         try {
-            getEntity(entity).performAction(action);
+            return getEntity(ent).performAction(action);
         } catch (TranslationException | IllegalArgumentException e1) {
             throw new ActException("Failed to execute action " + action, e1);
         }
-        return null;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class ContextEnv extends EisEnv {
      */
     @Override
     public TygronEntity createNewEntity(final EntityListener listener, final String stakeholder, final Integer slot) {
-        return new ContextEntity(listener, stakeholder, slot);
+    	return new ContextEntity(listener, stakeholder, slot);
     }
 
     @Override
@@ -128,4 +128,14 @@ public class ContextEnv extends EisEnv {
             translatorfactory.registerParameter2JavaTranslator(translator);
         }
     }
+
+
+	/**
+	 * Get an entity by stakeholder name.
+	 * @param stakeholder The stakeholder.
+	 * @return The entity
+	 */
+	public ContextEntity getEntity(final String stakeholder) {
+		return (ContextEntity) super.getEntity(stakeholder);
+	}
 }

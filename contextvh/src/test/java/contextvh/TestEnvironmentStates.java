@@ -2,11 +2,7 @@
 package contextvh;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,92 +25,98 @@ import eis.iilang.Percept;
 import tygronenv.EisEnv;
 import tygronenv.MyEnvListener;
 
-public class TestEnvironmentStates extends tygronenv.TestEnvironmentStates{
+/**
+ * Tests the different possible environment states.
+ * @author Max Groenenboom
+ */
+public class TestEnvironmentStates extends tygronenv.TestEnvironmentStates {
 
 	private static final String STAKEHOLDERS = "stakeholders";
 	private static final String MUNICIPALITY = "MUNICIPALITY";
 	private static final String INHABITANTS = "INHABITANTS";
 	private ContextEnv env;
-	private static String PROJECT = "project";
-	private static Identifier PROJECTNAME = new Identifier("testmap");
+	private static final String PROJECT = "project";
+	private static final Identifier PROJECTNAME = new Identifier("testmap");
 
 	/**
-	 * Factory method that delivers the environment under test
+	 * Factory method that delivers the environment under test.
 	 *
 	 * @return new {@link EisEnv} for testing
 	 */
-    @Override
+	@Override
 	public EisEnv createEnvironment() {
-        env = new ContextEnv();
+		env = new ContextEnv();
 		return env;
 	}
 
+	/**
+	 * Method executed after each test.
+	 * @throws ManagementException Thrown if any management exception occurs.
+	 * @throws InterruptedException Thrown if a wait was interrupted.
+	 */
 	@After
 	public void after() throws ManagementException, InterruptedException {
-        super.after();
+		super.after();
 		env.kill();
-        env = null;
+		env = null;
 	}
 
 	@Test
-    @Override
-	public void testStateChange() throws ManagementException, RelationException, AgentException, InterruptedException,
-			PerceiveException, NoEnvironmentException {
+	@Override
+	public void testStateChange() throws ManagementException, RelationException, AgentException,
+			InterruptedException, PerceiveException, NoEnvironmentException {
 
 		joinAsMunicipality();
 
 		Deque<Percept> percepts = env.getAllPerceptsFromEntity(MUNICIPALITY);
-		Percept expectedPercept = new Percept("stakeholders", new ParameterList( new ParameterList(
+		Percept expectedPercept = new Percept("stakeholders", new ParameterList(new ParameterList(
 				new Function("stakeholder", new Numeral(0), new Identifier("Municipality"),
-						new Numeral(0.0), new Numeral(0)), new Function("indicatorLink", new Numeral(0), 
-						        new ParameterList())),
-				new ParameterList(new Function("stakeholder", new Numeral(1), new Identifier("Inhabitants"),
-						new Numeral(0.0), new Numeral(0)), new Function("indicatorLink", new Numeral(1), 
-		                        new ParameterList()))));
+						new Numeral(0.0), new Numeral(0)), new Function("indicatorLink",
+								new Numeral(0), new ParameterList())),
+				new ParameterList(new Function("stakeholder", new Numeral(1),
+						new Identifier("Inhabitants"), new Numeral(0.0), new Numeral(0)),
+						new Function("indicatorLink", new Numeral(1), new ParameterList()))));
 		assertTrue(percepts.contains(expectedPercept));
-
 	}
-	
+
 	/**
 	 * Test my_stakeholder_id percept.
-	 * @throws ManagementException {@link ManagementException} 
+	 * @throws ManagementException {@link ManagementException}
 	 * @throws RelationException {@link RelationException}
 	 * @throws AgentException {@link AgentException}
 	 * @throws InterruptedException {@link InterruptedException}
 	 * @throws PerceiveException {@link PerceiveException}
 	 * @throws NoEnvironmentException {@link NoEnvironmentException}
 	 */
-	@Test 
-	public void testMyStakeholderIdInhabitant() throws ManagementException, 
+	@Test
+	public void testMyStakeholderIdInhabitant() throws ManagementException,
 	RelationException, AgentException, InterruptedException,
 	PerceiveException, NoEnvironmentException {
-		
+
 		joinAsInhabitants();
 		LinkedList<Percept> percepts = env.getAllPerceptsFromEntity(INHABITANTS);
-		Percept expectedPercept = new Percept("my_stakeholder_id", 
-				new Numeral(1));
+		Percept expectedPercept = new Percept("my_stakeholder_id", new Numeral(1));
 		assertTrue(percepts.contains(expectedPercept));
 
 	}
 
 	/**
 	 * Test my_stakeholder_id percept.
-	 * @throws ManagementException {@link ManagementException} 
+	 * @throws ManagementException {@link ManagementException}
 	 * @throws RelationException {@link RelationException}
 	 * @throws AgentException {@link AgentException}
 	 * @throws InterruptedException {@link InterruptedException}
 	 * @throws PerceiveException {@link PerceiveException}
 	 * @throws NoEnvironmentException {@link NoEnvironmentException}
 	 */
-	@Test 
-	public void testMyStakeholderIdMunicipality() throws ManagementException, 
+	@Test
+	public void testMyStakeholderIdMunicipality() throws ManagementException,
 	RelationException, AgentException, InterruptedException,
 	PerceiveException, NoEnvironmentException {
-		
+
 		joinAsMunicipality();
 		LinkedList<Percept> percepts = env.getAllPerceptsFromEntity(MUNICIPALITY);
-		Percept expectedPercept = new Percept("my_stakeholder_id", 
-				new Numeral(0));
+		Percept expectedPercept = new Percept("my_stakeholder_id", new Numeral(0));
 		assertTrue(percepts.contains(expectedPercept));
 
 	}
