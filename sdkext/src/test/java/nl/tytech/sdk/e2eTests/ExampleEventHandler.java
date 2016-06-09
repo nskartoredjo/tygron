@@ -1,4 +1,4 @@
-package nl.tytech.sdk.example;
+package nl.tytech.sdk.e2eTests;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,7 @@ public class ExampleEventHandler implements EventListenerInterface, EventIDListe
 	 * increments after every FIRST_UPDATE_FINISHED comes in
 	 **/
 	private int firstUpdate = 0;
+	private final int TIMEOUT = 5000;
 
 	private Integer connectionID;
 
@@ -54,6 +55,10 @@ public class ExampleEventHandler implements EventListenerInterface, EventIDListe
 			result &= isUpdated(mapLink);
 		}
 		return result;
+	}
+
+	public void close() {
+		EventManager.removeAllListeners(this);
 	}
 
 	public void resetUpdate(MapLink... mapLinks) {
@@ -94,13 +99,14 @@ public class ExampleEventHandler implements EventListenerInterface, EventIDListe
 
 	@Override
 	public void notifyListener(Event event) {
+
 		if (event instanceof SlotEvent) {
 			SlotEvent slotEvent = (SlotEvent) event;
 			if (!connectionID.equals(slotEvent.getConnectionID())) {
 				return;
 			}
-		}
 
+		}
 		if (event.getType() instanceof MapLink) {
 			mapLinkUpdated.put((MapLink) event.getType(), true);
 
@@ -143,6 +149,28 @@ public class ExampleEventHandler implements EventListenerInterface, EventIDListe
 		if (firstUpdate == 0) {
 			throw new InterruptedException("Timed out on waiting for FIRST_UPDATE_FINISHED.");
 		}
+	}
+
+	public void waitFor(MapLink... type) throws InterruptedException {
+		int timeoutMs = TIMEOUT;
+		// time to sleep if firstUpdate not yet
+		final int SLEEPTIME = 100;
+
+		while (!isUpdated(type) && timeoutMs > 0) {
+			Thread.sleep(SLEEPTIME);
+			timeoutMs -= SLEEPTIME;
+		}
+		if (!isUpdated(type)) {
+			throw new InterruptedException("Timed out on waiting for Maplinks ." + toString(type));
+		}
+	}
+
+	private String toString(MapLink... links) {
+		String value = "";
+		for (MapLink link : links) {
+			value += link + ",";
+		}
+		return value;
 	}
 
 }

@@ -10,10 +10,10 @@
 	</properties>
 
 	<groupId>tygron</groupId>
-	<artifactId>sdk-tests</artifactId>
-	<version>1.0.23</version>
-	<name>${environmentname} sdk tests</name>
-	<description>Tests for the Tytech SDK</description>
+	<artifactId>sdkext</artifactId>
+	<version>1.0.1</version>
+	<name>${environmentname} sdk extension</name>
+	<description>Extensions of the Tytech SDK</description>
 	<url>http://www.github.com/eishub/${environmentname}</url>
 
 	<licenses>
@@ -79,6 +79,20 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<!--  include also the tests.jar so that it can also be used in modules that extend this module -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 
 			<!-- running tygron sdk code (for the tests) requires java 1.8 -->
 			<plugin>
@@ -92,23 +106,70 @@
 			</plugin>
 
 
-			<!--  ignore deployment, this is only for testing the sdk. -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.8.2</version>
 				<configuration>
-					<skip>true</skip>
+					<altDeploymentRepository>internal.repo::default::file://${project.build.directory}/mvn-repo</altDeploymentRepository>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.12</version>
+				<configuration>
+					<server>github</server>
+					<message>Maven artifacts for ${project.name} version
+						${project.version}</message>
+					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
+					<branch>refs/heads/master</branch>
+					<merge>true</merge>
+					<includes>
+						<include>**/*</include>
+					</includes>
+					<repositoryName>mvn-repo</repositoryName>
+					<repositoryOwner>eishub</repositoryOwner>
+				</configuration>
+				<executions>
+					<execution>
+						<id>git-deploy</id>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>deploy</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+ 
 		</plugins>
+
+
 	</build>
 
 	<dependencies>
 		<dependency>
 			<groupId>nl.tygron</groupId>
 			<artifactId>sdk</artifactId>
-			<version>2016.5.0.5</version>
+			<version>2016.5.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

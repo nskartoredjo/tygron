@@ -12,7 +12,7 @@
 
 	<groupId>eishub</groupId>
 	<artifactId>tygronenv</artifactId>
-	<version>1.0.10</version>
+	<version>1.0.11</version>
 	<name>${environmentname}env</name>
 	<description>EIS-Tygron connector</description>
 	<url>http://www.github.com/eishub/${environmentname}</url>
@@ -58,9 +58,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>nl.tygron</groupId>
-			<artifactId>sdk</artifactId>
-			<version>2016.5.0.5</version>
+			<groupId>tygron</groupId>
+			<artifactId>sdkext</artifactId>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>eishub</groupId>
@@ -144,6 +144,14 @@
 						</manifest>
 					</archive>
 				</configuration>
+				<!--  include also the tests.jar so that it can also be used in modules that extend this module -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>

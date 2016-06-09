@@ -16,7 +16,7 @@
 
 	<modules>
 		<module>sdk</module>
-		<module>sdk-tests</module>
+		<module>sdkext</module>
 		<module>environment</module>
 		<module>doc</module>
 		<module>contextvh</module>

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import eis.eis2java.exception.TranslationException;
 import eis.iilang.Action;
 import eis.iilang.Percept;
+import nl.tytech.data.engine.event.ParticipantEventType;
 import nl.tytech.data.engine.item.Stakeholder;
 
 /**
@@ -20,12 +21,20 @@ import nl.tytech.data.engine.item.Stakeholder;
 public interface TygronEntity {
 
 	/**
-	 * Perform an action.
-	 * 
+	 * Perform given action
+	 *
 	 * @param action
+	 *            action of the form action(p1,...). Action must be a
+	 *            {@link ParticipantEventType}. The arguments are those as
+	 *            specified in {@link ParticipantEventType}, except that the
+	 *            obligatory first argument "Stakeholder ID" is automatically
+	 *            filled in so you can leave that out and start with parameter
+	 *            2.
 	 * @throws TranslationException
+	 *             if a parameter can not be translated.
+	 * @return {@link Percept}, or null if no percept is available.
 	 */
-	void performAction(Action action) throws TranslationException;
+	Percept performAction(Action action) throws TranslationException;
 
 	/**
 	 * @return the current percepts of this entity

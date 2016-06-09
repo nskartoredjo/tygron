@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import eis.EIDefaultImpl;
+import eis.eis2java.exception.NoTranslatorException;
 import eis.eis2java.exception.TranslationException;
 import eis.eis2java.translation.Java2Parameter;
 import eis.eis2java.translation.Parameter2Java;
@@ -68,7 +69,7 @@ public class EisEnv extends EIDefaultImpl implements EntityListener {
 		return getEntity(e).getPercepts();
 	}
 
-	private TygronEntity getEntity(String e) {
+	protected TygronEntity getEntity(String e) {
 		String entity = e.toUpperCase();
 		if (!entities.containsKey(entity)) {
 			throw new IllegalArgumentException("Unknown entity " + entity + ". Have:" + entities.keySet());
@@ -94,11 +95,10 @@ public class EisEnv extends EIDefaultImpl implements EntityListener {
 	@Override
 	protected Percept performEntityAction(String e, Action action) throws ActException {
 		try {
-			getEntity(e).performAction(action);
+			return getEntity(e).performAction(action);
 		} catch (TranslationException | IllegalArgumentException e1) {
 			throw new ActException("Failed to execute action " + action, e1);
 		}
-		return null;
 	}
 
 	@Override
@@ -106,11 +106,12 @@ public class EisEnv extends EIDefaultImpl implements EntityListener {
 		super.init(parameters);
 		Configuration config;
 		try {
-			config = new Configuration(parameters);
+
+			config = createConfiguration(parameters);
 		} catch (TranslationException e) {
 			throw new ManagementException("problem with the init settings", e);
 		}
-		serverConnection = new ServerConnection(config);
+		serverConnection = createServerConnection(config);
 		setState(EnvironmentState.RUNNING);
 
 		for (String st : config.getStakeholders()) {
@@ -120,6 +121,32 @@ public class EisEnv extends EIDefaultImpl implements EntityListener {
 			entities.put(stakeholder, entity);
 		}
 
+	}
+
+	/**
+	 * Factory method to create {@link ServerConnection}.
+	 * 
+	 * @param config
+	 *            the configuration to use
+	 * @return new {@link ServerConnection} that respects given configuration
+	 * @throws ManagementException
+	 */
+	public ServerConnection createServerConnection(Configuration config) throws ManagementException {
+		return new ServerConnection(config);
+	}
+
+	/**
+	 * Factory method to create {@link Configuration}
+	 * 
+	 * @param parameters
+	 *            map with the init parameters
+	 * @return new {@link Configuration} that respects given parameters
+	 * @throws TranslationException
+	 * @throws NoTranslatorException
+	 */
+	public Configuration createConfiguration(Map<String, Parameter> parameters)
+			throws NoTranslatorException, TranslationException {
+		return new Configuration(parameters);
 	}
 
 	/**

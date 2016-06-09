@@ -28,11 +28,11 @@ public class J2UpgradeType implements Java2Parameter<UpgradeType> {
     public Parameter[] translate(final UpgradeType u) throws TranslationException {
         if (u.getPairs().size() > 0) {
             UpgradePair pair = u.getPairs().get(0);
-            return new Parameter[]{new Function("upgrade_type", new Numeral(u.getID()),
+            return new Parameter[] {new Function("upgrade_type", new Numeral(u.getID()),
                     new Numeral(pair.getSourceFunctionID()),
                     new Numeral(pair.getTargetFunctionID()))};
         }
-        return new Parameter[]{new Function("upgrade_type", new Numeral(u.getID()))};
+        return new Parameter[] {new Function("upgrade_type", new Numeral(u.getID()))};
     }
 
     /**

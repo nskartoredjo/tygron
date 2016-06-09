@@ -1,4 +1,4 @@
-package nl.tytech.sdk.example;
+package nl.tytech.sdk.e2eTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -145,7 +145,6 @@ public class TwoStakeholdersTest {
 
 	@Test
 	public void test06closeEditSession() throws Exception {
-
 		/**
 		 * Save project in our slotID
 		 */
@@ -156,6 +155,22 @@ public class TwoStakeholdersTest {
 		 * Disconnect from slot
 		 */
 		slotConnection.disconnect(false);
+		// TODO: (Frank) Check this out
+		// assertTrue(projectStartable(data.getFileName()));
+	}
+
+	private boolean projectStartable(String projectFileName) {
+		for (int i = 0; i < 60; i++) {
+			ProjectData[] projects = ServicesManager.fireServiceEvent(IOServiceEventType.GET_MY_STARTABLE_PROJECTS);
+			for (ProjectData projectData : projects) {
+				if (projectFileName.equals(projectData.getFileName())) {
+					return true;
+				}
+
+			}
+			ThreadUtils.sleepInterruptible(1000);
+		}
+		return false;
 	}
 
 	@Test
@@ -198,7 +213,8 @@ public class TwoStakeholdersTest {
 
 		holdersIDs = new ArrayList<>();
 
-		ItemMap<Stakeholder> stakeholders = EventManager.getItemMap(slotConnection.getConnectionID(), MapLink.STAKEHOLDERS);
+		ItemMap<Stakeholder> stakeholders = EventManager.getItemMap(slotConnection.getConnectionID(),
+				MapLink.STAKEHOLDERS);
 		for (Stakeholder stakeholder : stakeholders) {
 			holdersIDs.add(stakeholder.getID());
 		}
@@ -209,7 +225,7 @@ public class TwoStakeholdersTest {
 	}
 
 	@Test
-	public void test09Stakeholder0buyLand() throws Exception {
+	public void test09Stakeholder0SellLand() throws Exception {
 		ItemMap<Land> lands = EventManager.getItemMap(slotConnection.getConnectionID(), MapLink.LANDS);
 
 		Land sellLand = null;
@@ -224,7 +240,8 @@ public class TwoStakeholdersTest {
 
 		sellerID = sellLand.getOwnerID();
 		buyerID = Item.NONE;
-		for (Stakeholder stakeholder : EventManager.<Stakeholder> getItemMap(slotConnection.getConnectionID(), MapLink.STAKEHOLDERS)) {
+		for (Stakeholder stakeholder : EventManager.<Stakeholder> getItemMap(slotConnection.getConnectionID(),
+				MapLink.STAKEHOLDERS)) {
 			if (!stakeholder.getID().equals(sellerID)) {
 				buyerID = stakeholder.getID();
 				break;
@@ -262,8 +279,8 @@ public class TwoStakeholdersTest {
 		for (PopupData popupData : popups) {
 			boolean forBuyer = popupData.getVisibleForStakeholderIDs().contains(buyerID);
 			boolean correctMapLink = popupData.getContentMapLink() == MapLink.SPECIAL_OPTIONS;
-			SpecialOption specialOption = EventManager.getItem(slotConnection.getConnectionID(), MapLink.SPECIAL_OPTIONS,
-					popupData.getContentLinkID());
+			SpecialOption specialOption = EventManager.getItem(slotConnection.getConnectionID(),
+					MapLink.SPECIAL_OPTIONS, popupData.getContentLinkID());
 			boolean isSellLand = specialOption != null && specialOption.getType() == SpecialOption.Type.SELL_LAND;
 
 			if (forBuyer && correctMapLink && isSellLand) {
@@ -295,8 +312,8 @@ public class TwoStakeholdersTest {
 		for (PopupData popupData : popups) {
 			boolean forBuyer = popupData.getVisibleForStakeholderIDs().contains(buyerID);
 			boolean correctMapLink = popupData.getContentMapLink() == MapLink.SPECIAL_OPTIONS;
-			SpecialOption specialOption = EventManager.getItem(slotConnection.getConnectionID(), MapLink.SPECIAL_OPTIONS,
-					popupData.getContentLinkID());
+			SpecialOption specialOption = EventManager.getItem(slotConnection.getConnectionID(),
+					MapLink.SPECIAL_OPTIONS, popupData.getContentLinkID());
 			boolean isSellLand = specialOption != null && specialOption.getType() == SpecialOption.Type.SELL_LAND;
 
 			if (forBuyer && correctMapLink && isSellLand) {

@@ -14,18 +14,22 @@ import nl.tytech.data.editor.event.EditorSettingsEventType;
 import nl.tytech.data.editor.event.EditorStakeholderEventType;
 import nl.tytech.data.engine.item.Stakeholder;
 import nl.tytech.locale.TLanguage;
+import nl.tytech.util.ThreadUtils;
+import nl.tytech.util.logger.TLogger;
 
 /**
  * Factory to fetch existing and create new projects
- * 
+ *
  * @author W.Pasman
  *
  */
 public class ProjectFactory {
 
+	private final static String DOMAIN = "tudelft";
+
 	/**
 	 * Join existing project.
-	 * 
+	 *
 	 * @param name
 	 *            the project name to join/make.
 	 * @return project with given name, or null if no project with given name
@@ -33,7 +37,9 @@ public class ProjectFactory {
 	 * @throws ManagementException
 	 */
 	public ProjectData getProject(String name) {
-		ProjectData[] projects = ServicesManager.fireServiceEvent(IOServiceEventType.GET_MY_STARTABLE_PROJECTS);
+
+		ProjectData[] projects = ServicesManager.fireServiceEvent(IOServiceEventType.GET_DOMAIN_STARTABLE_PROJECTS,
+				DOMAIN);
 		if (projects != null) {
 			for (ProjectData existing : projects) {
 				if (existing.getFileName().equals(name)) {
@@ -49,9 +55,9 @@ public class ProjectFactory {
 	 * Assumes that there is no existing project with given name (eg
 	 * {@link #getProject(String)} returned null). Create one and initialize it.
 	 * Bit hacky, it does not do much for the map, it probably stays empty.
-	 * 
+	 *
 	 * @throws ProjectException
-	 * 
+	 *
 	 * @throws ManagementException
 	 */
 	public ProjectData createProject(String name) throws ProjectException {
@@ -68,17 +74,35 @@ public class ProjectFactory {
 
 		String result = ServicesManager.fireServiceEvent(IOServiceEventType.SAVE_PROJECT_INIT, slotID);
 		if (result != null) {
-			throw new ProjectException("Failed to save new project" + result);
+			throw new ProjectException("Failed to save new project " + proj.getFileName() + ": " + result);
 		}
 
 		editSlot.disconnect(false);
 
+		if (!projectStartable(proj.getFileName())) {
+			TLogger.warning("Failed to correctly close project: " + proj.getFileName());
+		}
+
 		return proj;
+	}
+
+	private boolean projectStartable(String projectFileName) {
+		for (int i = 0; i < 10; i++) {
+			ProjectData[] projects = ServicesManager.fireServiceEvent(IOServiceEventType.GET_MY_STARTABLE_PROJECTS);
+			for (ProjectData projectData : projects) {
+				if (projectFileName.equals(projectData.getFileName())) {
+					return true;
+				}
+
+			}
+			ThreadUtils.sleepInterruptible(1000);
+		}
+		return false;
 	}
 
 	/**
 	 * open an editor slot
-	 * 
+	 *
 	 * @param proj
 	 *            the project to open an edit slot for
 	 * @return a {@link SlotConnection} that can be used for editing the
@@ -87,8 +111,7 @@ public class ProjectFactory {
 	 */
 	private TSlotConnection editProject(Integer slotID) throws ProjectException {
 
-		JoinReply reply = ServicesManager.fireServiceEvent(IOServiceEventType.JOIN_SESSION, slotID,
-				AppType.EDITOR);
+		JoinReply reply = ServicesManager.fireServiceEvent(IOServiceEventType.JOIN_SESSION, slotID, AppType.EDITOR);
 		if (reply == null) {
 			throw new ProjectException("failed to edit project:" + reply);
 		}
@@ -105,7 +128,7 @@ public class ProjectFactory {
 
 	/**
 	 * Add map and civilian stakeholder
-	 * 
+	 *
 	 * @param slotConnection
 	 *            the connection with the editor slot
 	 * @throws ManagementException
@@ -124,14 +147,18 @@ public class ProjectFactory {
 
 	/**
 	 * Deletes project on the server.
-	 * 
+	 *
 	 * @param project
 	 * @throws ManagementException
 	 */
 	public void deleteProject(ProjectData project) throws ProjectException {
+		if (!projectStartable(project.getFileName())) {
+			TLogger.warning("Unable to delete project " + project.getFileName() + " on the server");
+		}
+
 		Boolean result = ServicesManager.fireServiceEvent(IOServiceEventType.DELETE_PROJECT, project.getFileName());
 		if (!result) {
-			throw new ProjectException("failed to delete project " + project.getFileName() + " on the server");
+			TLogger.warning("failed to delete project " + project.getFileName() + " on the server");
 		}
 
 	}

@@ -1,4 +1,4 @@
-package nl.tytech.sdk.example;
+package nl.tytech.sdk.e2eTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -142,7 +142,8 @@ public class PlanBuildingsTest {
 		}
 		assertTrue(updated);
 
-		ItemMap<Stakeholder> stakeholders = EventManager.getItemMap(slotConnection.getConnectionID(), MapLink.STAKEHOLDERS);
+		ItemMap<Stakeholder> stakeholders = EventManager.getItemMap(slotConnection.getConnectionID(),
+				MapLink.STAKEHOLDERS);
 		for (Stakeholder stakeholder : stakeholders) {
 			stakeholderID = stakeholder.getID();
 			break;
@@ -225,7 +226,8 @@ public class PlanBuildingsTest {
 		// slotConnection.fireServerEvent(false,
 		// LogicEventType.SETTINGS_ALLOW_INTERACTION, true);
 
-		ItemMap<Stakeholder> stakeholders = EventManager.getItemMap(slotConnection.getConnectionID(), MapLink.STAKEHOLDERS);
+		ItemMap<Stakeholder> stakeholders = EventManager.getItemMap(slotConnection.getConnectionID(),
+				MapLink.STAKEHOLDERS);
 		for (Stakeholder stakeholder : stakeholders) {
 			stakeholderID = stakeholder.getID();
 			break;
@@ -239,8 +241,8 @@ public class PlanBuildingsTest {
 		Integer zoneID = 0;
 
 		Function function = null;
-		actionMenuLoop: for (ActionMenu actionMenu : EventManager.<ActionMenu> getItemMap(slotConnection.getConnectionID(),
-				MapLink.ACTION_MENUS)) {
+		actionMenuLoop: for (ActionMenu actionMenu : EventManager
+				.<ActionMenu> getItemMap(slotConnection.getConnectionID(), MapLink.ACTION_MENUS)) {
 			if (actionMenu.isBuildable(stakeholderID))
 				for (Function buildableFunction : actionMenu.getFunctionTypeOptions()) {
 					if (buildableFunction.getPlacementType() != PlacementType.WATER) {
@@ -252,8 +254,8 @@ public class PlanBuildingsTest {
 
 		assertTrue("No applicable land function found!", function != null);
 
-		List<Polygon> buildablePolygons = SDKTestUtil.getBuildableLand(slotConnection.getConnectionID(), MapType.MAQUETTE, stakeholderID, zoneID,
-				function.getPlacementType());
+		List<Polygon> buildablePolygons = SDKTestUtil.getBuildableLand(slotConnection.getConnectionID(),
+				MapType.MAQUETTE, stakeholderID, zoneID, function.getPlacementType());
 
 		assertTrue("No buildable polygons found!", buildablePolygons.size() > 0);
 
@@ -281,10 +283,12 @@ public class PlanBuildingsTest {
 		}
 		assertTrue(updated);
 
-		ActionLog actionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS, buildActionLogID);
+		ActionLog actionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS,
+				buildActionLogID);
 		assertTrue("Actionlog with ID " + buildActionLogID + " does not exist!", actionLog != null);
 
-		for (Indicator indicator : EventManager.<Indicator> getItemMap(slotConnection.getConnectionID(), MapLink.INDICATORS)) {
+		for (Indicator indicator : EventManager.<Indicator> getItemMap(slotConnection.getConnectionID(),
+				MapLink.INDICATORS)) {
 			if (actionLog.containsAfterScore(indicator)) {
 				Double increase = actionLog.getIncrease(indicator);
 				TLogger.info("Indicator: " + indicator + " change: " + increase);
@@ -296,10 +300,12 @@ public class PlanBuildingsTest {
 	@Test
 	public void test11RevertConstruction() throws Exception {
 
-		ActionLog actionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS, buildActionLogID);
+		ActionLog actionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS,
+				buildActionLogID);
 		assertTrue("Maplink of ActionLog " + actionLog + " was not BUILDINGS", !actionLog.getBuildingIDs().isEmpty());
 
-		List<Building> buildings = EventManager.<Building> getItemMap(slotConnection.getConnectionID(), MapLink.BUILDINGS)
+		List<Building> buildings = EventManager
+				.<Building> getItemMap(slotConnection.getConnectionID(), MapLink.BUILDINGS)
 				.getItems(actionLog.getBuildingIDs());
 		assertTrue("Building of ActionLog " + actionLog + " does not exist!", !buildings.isEmpty());
 
@@ -321,18 +327,22 @@ public class PlanBuildingsTest {
 		}
 		assertTrue(updated);
 
-		ActionLog buildActionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS, buildActionLogID);
-		List<Building> buildings = EventManager.<Building> getItemMap(slotConnection.getConnectionID(), MapLink.BUILDINGS)
+		ActionLog buildActionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS,
+				buildActionLogID);
+		List<Building> buildings = EventManager
+				.<Building> getItemMap(slotConnection.getConnectionID(), MapLink.BUILDINGS)
 				.getItems(buildActionLog.getBuildingIDs());
 
 		for (Building building : buildings) {
 			assertTrue("Building " + building + " is not reverted!", !building.isInMap(MapType.MAQUETTE));
 		}
 
-		ActionLog revertActionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS, revertActionLogID);
+		ActionLog revertActionLog = EventManager.getItem(slotConnection.getConnectionID(), MapLink.ACTION_LOGS,
+				revertActionLogID);
 		assertTrue("Revert ActionLog does not exist", revertActionLog != null);
 
-		for (Indicator indicator : EventManager.<Indicator> getItemMap(slotConnection.getConnectionID(), MapLink.INDICATORS)) {
+		for (Indicator indicator : EventManager.<Indicator> getItemMap(slotConnection.getConnectionID(),
+				MapLink.INDICATORS)) {
 			if (revertActionLog.containsAfterScore(indicator)) {
 				Double increase = revertActionLog.getIncrease(indicator);
 				TLogger.info("Indicator: " + indicator + " change: " + increase);

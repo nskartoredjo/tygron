@@ -177,21 +177,8 @@ public class TygronEntityImpl implements TygronEntity, EntityEventListener {
 		return allPercepts;
 	}
 
-	/**
-	 * Perform given action
-	 *
-	 * @param action
-	 *            action of the form action(p1,...). Action must be a
-	 *            {@link ParticipantEventType}. The arguments are those as
-	 *            specified in {@link ParticipantEventType}, except that the
-	 *            obligatory first argument "Stakeholder ID" is automatically
-	 *            filled in so you can leave that out and start with parameter
-	 *            2.
-	 * @throws TranslationException
-	 *             if a parameter can not be translated.
-	 */
 	@Override
-	public void performAction(Action action) throws TranslationException {
+	public Percept performAction(Action action) throws TranslationException {
 		/**
 		 * Action is of the form 'BUILDING_PLAN_CONSTRUCTION'(p1,p2,p3...).
 		 *
@@ -210,6 +197,7 @@ public class TygronEntityImpl implements TygronEntity, EntityEventListener {
 
 		// call. We ignore the return value.
 		slotConnection.fireServerEvent(true, type, arguments);
+		return null;
 	}
 
 	/**

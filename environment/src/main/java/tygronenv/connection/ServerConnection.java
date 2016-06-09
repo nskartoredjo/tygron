@@ -32,7 +32,7 @@ public class ServerConnection {
 	 * Session can be used by all team members.
 	 */
 	private Session session = null;
-	private ProjectFactory factory = new ProjectFactory();
+	private ProjectFactory factory = createFactory();
 
 	/**
 	 * Connect with the server, and create Session with the
@@ -68,6 +68,16 @@ public class ServerConnection {
 
 		session = new Session(config, project);
 
+	}
+
+	/**
+	 * Factory method for projectfactory.
+	 * 
+	 * @return {@link ProjectFactory}. Is created only 1 time and instantiation
+	 *         is kept.
+	 */
+	public ProjectFactory createFactory() {
+		return new ProjectFactory();
 	}
 
 	/**

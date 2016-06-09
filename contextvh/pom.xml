@@ -14,12 +14,13 @@
         <!-- name of the main project on eishub. -->
         <environmentname>context</environmentname>
         <mainclass>contextvh.ContextEnv</mainclass>
+        <tygronenv.version>1.0.11</tygronenv.version>
         <powermock.version>1.6.5</powermock.version>
     </properties>
 
     <groupId>tygron</groupId>
     <artifactId>contextvh</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.1</version>
     <name>${environmentname}env</name>
     <description>EIS-Tygron connector for the 2016 context project</description>
 
@@ -47,19 +48,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>nl.tygron</groupId>
-            <artifactId>sdk</artifactId>
-            <version>2016.5.0.5</version>
-        </dependency>
-        <dependency>
             <groupId>eishub</groupId>
             <artifactId>eis</artifactId>
             <version>0.5.0</version>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>eishub</groupId>
             <artifactId>tygronenv</artifactId>
-            <version>1.0.10</version>
+            <version>${tygronenv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eishub</groupId>
+            <artifactId>tygronenv</artifactId>
+            <version>${tygronenv.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

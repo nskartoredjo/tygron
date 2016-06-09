@@ -1,4 +1,4 @@
-package nl.tytech.sdk.example;
+package nl.tytech.sdk.e2eTests;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,16 @@ import nl.tytech.util.JTSUtils;
 
 public class SDKTestUtil {
 
+	/**
+	 * Find land that can be built on.
+	 * 
+	 * @param connectionID
+	 * @param mapType
+	 * @param stakeholderID
+	 * @param zoneID
+	 * @param placementType
+	 * @return
+	 */
 	public static List<Polygon> getBuildableLand(Integer connectionID, MapType mapType, Integer stakeholderID,
 			Integer zoneID, PlacementType placementType) {
 		Zone zone = EventManager.getItem(connectionID, MapLink.ZONES, zoneID);
@@ -73,6 +83,19 @@ public class SDKTestUtil {
 		return buildablePolygons;
 	}
 
+	/**
+	 * TODO DOC what is this
+	 * 
+	 * @param connectionID
+	 * @param mapType
+	 * @param stakeholderID
+	 * @param zoneID
+	 * @param placementType
+	 * @param width
+	 * @param depth
+	 * @param distanceToRoad
+	 * @return list of polygons.
+	 */
 	public static List<MultiPolygon> createBlueprintMPs(Integer connectionID, MapType mapType, Integer stakeholderID,
 			Integer zoneID, PlacementType placementType, double width, double depth, double distanceToRoad) {
 

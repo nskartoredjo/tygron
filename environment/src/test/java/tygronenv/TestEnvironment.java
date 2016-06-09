@@ -35,7 +35,16 @@ public class TestEnvironment {
 
 	@Before
 	public void before() {
-		env = new EisEnv();
+		env = createEnvironment();
+	}
+
+	/**
+	 * Factory method that delivers the environment under test
+	 * 
+	 * @return new {@link EisEnv} for testing
+	 */
+	public EisEnv createEnvironment() {
+		return new EisEnv();
 	}
 
 	@After

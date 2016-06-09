@@ -50,7 +50,7 @@ public class J2Indicator implements Java2Parameter<Indicator> {
             }
         }
 
-        return new Parameter[]{new Function("indicator",
+        return new Parameter[] {new Function("indicator",
                 new Numeral(indicator.getID()),
                 new Numeral(currentValue),
                 new Numeral(target), pl)};

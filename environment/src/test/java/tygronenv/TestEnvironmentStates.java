@@ -40,7 +40,16 @@ public class TestEnvironmentStates {
 
 	@Before
 	public void before() {
-		env = new EisEnv();
+		env = createEnvironment();
+	}
+
+	/**
+	 * Factory method that delivers the environment under test
+	 * 
+	 * @return new {@link EisEnv} for testing
+	 */
+	public EisEnv createEnvironment() {
+		return new EisEnv();
 	}
 
 	@After
@@ -157,7 +166,7 @@ public class TestEnvironmentStates {
 	 * @throws ManagementException
 	 * @throws InterruptedException
 	 */
-	private void joinAsMunicipality() throws ManagementException, InterruptedException {
+	protected void joinAsMunicipality() throws ManagementException, InterruptedException {
 		MyEnvListener listener = new MyEnvListener();
 		env.attachEnvironmentListener(listener);
 
