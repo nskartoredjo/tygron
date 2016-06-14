@@ -34,6 +34,7 @@ public class ContextEntity extends tygronenv.TygronEntityImpl {
 
 	@Override
 	public Percept performAction(final Action action) throws TranslationException {
+		System.out.println(action);
 		CustomAction customAction = customActions.get(action);
 		if (customAction != null) {
 			return customAction.call(this, action.getParameters());

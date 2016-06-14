@@ -11,6 +11,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import contextvh.ContextEntity;
 import eis.eis2java.exception.TranslationException;
+import eis.iilang.Action;
 import eis.iilang.Identifier;
 import eis.iilang.Numeral;
 import eis.iilang.Parameter;
@@ -37,8 +38,12 @@ public class BuySpecifiedLand implements CustomAction {
 			Number minArea = ((Numeral) params.next()).getValue();
 			Number maxArea = ((Numeral) params.next()).getValue();
 			
-			
-			return null;
+			List<Polygon> buyableLand = getBuyableLand(sID.intValue(), zoneID.intValue());
+			LinkedList<Parameter> para = new LinkedList<Parameter>();
+			para.add(new Numeral(sID.intValue()));
+			para.add(new Identifier(buyableLand.get(0).toString()));
+			para.add(new Numeral(0.0));
+			return caller.performAction(new Action("map_buy_land", para));
 			//return caller.performAction(action)
 		} catch (Exception e) {
 			TLogger.exception(e);
@@ -48,7 +53,7 @@ public class BuySpecifiedLand implements CustomAction {
 
 	@Override
 	public String getName() {
-		return "sell_specified_land";
+		return "buy_specified_land";
 	}
 	
 	public static List<Polygon> getBuyableLand(Integer stakeholderID, Integer zoneID) {
