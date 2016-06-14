@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import contextvh.ContextEntity;
 import eis.eis2java.exception.TranslationException;
 import eis.iilang.Action;
+import eis.iilang.Function;
 import eis.iilang.Identifier;
 import eis.iilang.Numeral;
 import eis.iilang.Parameter;
@@ -38,10 +39,11 @@ public class BuySpecifiedLand implements CustomAction {
 			Number minArea = ((Numeral) params.next()).getValue();
 			Number maxArea = ((Numeral) params.next()).getValue();
 			
-			List<Polygon> buyableLand = getBuyableLand(sID.intValue(), zoneID.intValue());
+			MultiPolygon buyableLand = getBuyableLand(sID.intValue(), zoneID.intValue());
 			LinkedList<Parameter> para = new LinkedList<Parameter>();
-			para.add(new Numeral(sID.intValue()));
-			para.add(new Identifier(buyableLand.get(0).toString()));
+			Function f = new Function("multipolygon", new Identifier(buyableLand.toString()));
+			para.add(f);
+			
 			para.add(new Numeral(0.0));
 			return caller.performAction(new Action("map_buy_land", para));
 			//return caller.performAction(action)
@@ -56,7 +58,7 @@ public class BuySpecifiedLand implements CustomAction {
 		return "buy_specified_land";
 	}
 	
-	public static List<Polygon> getBuyableLand(Integer stakeholderID, Integer zoneID) {
+	public static MultiPolygon getBuyableLand(Integer stakeholderID, Integer zoneID) {
 
 		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
 		MultiPolygon constructableLand = zone.getMultiPolygon();
@@ -79,7 +81,7 @@ public class BuySpecifiedLand implements CustomAction {
 		}
 
 		MultiPolygon myLandsMP = JTSUtils.createMP(buyableLands);
-		return JTSUtils.getPolygons(myLandsMP);
+		return myLandsMP;
 	}
 
 }
