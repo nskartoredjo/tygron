@@ -243,7 +243,7 @@ public class MapUtilsTest {
 		joinAsMunicipality();
 		Geometry geo = MapUtils.getZonesCombined(connectionID, ZONE_WITH_BUILDING);
 		MultiPolygon mp = JTSUtils.createMP(geo);
-		mp = MapUtils.removeBuildings(connectionID, mp);
+		mp = MapUtils.removeBuildings(connectionID, null, mp);
 		final int areaBuilding = 4;
 		assertEquals(AREA_MUNICIPALITY / NUM_ZONES - areaBuilding, mp.getArea(), 0);
 	}

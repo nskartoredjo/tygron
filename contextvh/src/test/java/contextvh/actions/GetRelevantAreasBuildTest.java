@@ -73,7 +73,7 @@ public class GetRelevantAreasBuildTest {
 		//9m2 + 4m2 building
 		//1m2 water
 		final double reservedArea = 9 + 4 + 1;
-		double area = action.getUsableArea(env.getEntity(MUNICIPALITY), null).getArea();
+		double area = action.getUsableArea(env.getEntity(MUNICIPALITY), new Parameters()).getArea();
 		assertEquals(AREA_MUNICIPALITY - reservedArea, area, 0);
 	}
 

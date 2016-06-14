@@ -16,7 +16,7 @@ import nl.tytech.data.engine.serializable.UpgradePair;
 
 /**
  * Test for the J2UpgradeType class.
- * 
+ *
  * @author Marco Houtman
  *
  */
@@ -30,8 +30,8 @@ public class J2UpgradeTypeTest {
 	 */
 	private UpgradeType upgradeType;
 	private UpgradePair upgradePair;
-	private ArrayList<UpgradePair>  a;
-	
+	private ArrayList<UpgradePair> a;
+
 	/**
 	 * Initialise before every test.
 	 */
@@ -42,30 +42,34 @@ public class J2UpgradeTypeTest {
 		upgradePair = mock(UpgradePair.class);
 		a = new ArrayList<UpgradePair>();
 	}
-	
+
 	/**
-	 * Tests if the translator returns the source and target of an upgradePair
-	 * @throws TranslationException thrown if translation fails.
+	 * Tests if the translator returns the source and target of an upgradePair.
+	 *
+	 * @throws TranslationException
+	 *             thrown if translation fails.
 	 */
 	@Test
-	public void tranlatorTest1() throws TranslationException {
+	public void translatorTest1() throws TranslationException {
 		a.add(upgradePair);
 		when(upgradeType.getPairs()).thenReturn(a);
 		translator.translate(upgradeType);
 		verify(upgradePair, times(1)).getSourceFunctionID();
 		verify(upgradePair, times(1)).getTargetFunctionID();
 	}
-	
+
 	/**
-	 * Tests if the translator will not try to look for a source and target of an upgradePair
-	 * if the translator has an empty list of pairs
-	 * @throws TranslationException if translation fails.
+	 * Tests if the translator will not try to look for a source and target of
+	 * an upgradePair if the translator has an empty list of pairs.
+	 *
+	 * @throws TranslationException
+	 *             if translation fails.
 	 */
-	
+
 	@Test
 	public void translatorTest2() throws TranslationException {
 		translator.translate(upgradeType);
 		verify(upgradeType, times(1)).getPairs();
 	}
-	
+
 }
