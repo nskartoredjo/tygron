@@ -27,17 +27,45 @@ import nl.tytech.util.JTSUtils;
 
 public class MapUtilsExt extends MapUtils {
 
+	/**
+	 * protected constructor
+	 */
 	protected MapUtilsExt() {
 		super();
 	}
-	
+
+	/**
+	 * Test if a filtered land is empty, if so, use the alternative land
+	 * 
+	 * @param land
+	 *            the alternative land
+	 * @param filteredLand
+	 *            the filtered land which may be empty
+	 * @return the filteredLand only if it is not empty, otherwise return land
+	 */
 	public static MultiPolygon getNonEmptyLand(MultiPolygon land, MultiPolygon filteredLand) {
-		if(filteredLand.isEmpty())
+		if (filteredLand.isEmpty())
 			return land;
 		else
 			return filteredLand;
 	}
 
+	/**
+	 * uses the land to create sub-polygons based on the specifications. A
+	 * random located land will be returned.
+	 * 
+	 * @param land
+	 *            The land which should be the base to create the smaller
+	 *            specified sub-polygons.
+	 * @param depth
+	 *            The depth specification.
+	 * @param width
+	 *            The width specification.
+	 * @param distanceToRoad
+	 *            The DistanceToRoad specification.
+	 * @return one multi-polygon randomly collected from a list of sub-polygons.
+	 * @throws TranslationException
+	 */
 	public static MultiPolygon getSpecifiedLand(final MultiPolygon land, final double depth, final double width,
 			final double distanceToRoad) throws TranslationException {
 		List<Polygon> polygons = JTSUtils.getPolygons(land);
@@ -69,6 +97,9 @@ public class MapUtilsExt extends MapUtils {
 	 * Gets land which is buyable, excluding land from the stakeholder and
 	 * reserved land.
 	 * 
+	 * @param indicator
+	 *            The indicator indicates if it should use the land from the
+	 *            stakeholder or not, based on the action it got called from.
 	 * @param stakeholderID
 	 *            the stakeholder ID.
 	 * @param zoneID
@@ -82,7 +113,7 @@ public class MapUtilsExt extends MapUtils {
 		MultiPolygon constructableLand = zone.getMultiPolygon();
 
 		constructableLand = excludeReservedLand(constructableLand);
-		
+
 		List<Geometry> buyableLands = new ArrayList<>();
 		for (Land land : EventManager.<Land> getItemMap(MapLink.LANDS)) {
 			if (!land.getOwnerID().equals(stakeholderID) && indicator.equals("buy_land")) {
@@ -100,7 +131,7 @@ public class MapUtilsExt extends MapUtils {
 		MultiPolygon myLandsMP = JTSUtils.createMP(buyableLands);
 		return getNonEmptyLand(constructableLand, myLandsMP);
 	}
-	
+
 	/**
 	 * Excludes reserved land from the given land.
 	 * 
@@ -110,10 +141,10 @@ public class MapUtilsExt extends MapUtils {
 	 */
 	public static MultiPolygon excludeReservedLand(final MultiPolygon land) {
 		MultiPolygon filteredLand = JTSUtils.EMPTY;
-		
+
 		Setting reservedLandSetting = EventManager.getItem(MapLink.SETTINGS, Setting.Type.RESERVED_LAND);
 		MultiPolygon reservedLand = reservedLandSetting.getMultiPolygon();
-		
+
 		if (JTSUtils.containsData(reservedLand)) {
 			filteredLand = JTSUtils.difference(land, reservedLand);
 		}
@@ -289,7 +320,7 @@ public class MapUtilsExt extends MapUtils {
 
 		if (specifiedPolygons.isEmpty())
 			specifiedPolygons.add(JTSUtils.createMP(polygon));
-			
+
 		return specifiedPolygons;
 	}
 

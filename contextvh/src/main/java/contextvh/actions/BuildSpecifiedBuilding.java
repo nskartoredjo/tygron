@@ -20,7 +20,18 @@ public class BuildSpecifiedBuilding implements CustomAction {
 
 	private final int LEVEL = 1;
 
-	// building_plan_construction(Id, Level, MultiPolygon)
+	/**
+	 * this method includes multiple procedures:
+	 * 
+	 * - It retrieves the parameter values.
+	 * 
+	 * - If there are more parameters, then it will return an exception.
+	 * 
+	 * - It will create a land which is buildable.
+	 * 
+	 * - It will create a random located land which are based on the
+	 * specifications.
+	 */
 	@Override
 	public Percept call(ContextEntity caller, LinkedList<Parameter> parameters) throws TranslationException {
 		try {
@@ -38,7 +49,6 @@ public class BuildSpecifiedBuilding implements CustomAction {
 			MultiPolygon buildableLand = MapUtilsExt.getLand("build_building", sID.intValue(), zoneID.intValue());
 
 			buildableLand = MapUtilsExt.excludeBuildingLand(buildableLand);
-
 			buildableLand = MapUtilsExt.getSpecifiedLand(buildableLand, depth.doubleValue(), width.doubleValue(),
 					distanceToRoad.doubleValue());
 
@@ -54,6 +64,9 @@ public class BuildSpecifiedBuilding implements CustomAction {
 		}
 	}
 
+	/**
+	 * get name to which will be used in the GOAL agent as action
+	 */
 	@Override
 	public String getName() {
 		return "build_specified_building";

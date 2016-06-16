@@ -44,20 +44,17 @@ public class BuySpecifiedLand implements CustomAction {
 	/**
 	 * this method includes multiple procedures:
 	 * 
-	 * - It retrieves the values.
+	 * - It retrieves the parameter values.
 	 * 
-	 * - within the parameter list. If there are more parameters, then it will
-	 * return an exception.
+	 * - If there are more parameters, then it will return an exception.
 	 * 
 	 * - It will create a land which is buyable.
 	 * 
 	 * - Based on the parameter BuyOnBuilding, it allows to: exclude buildings,
 	 * include buildings, or only buy areas on buildings.
 	 * 
-	 * - It will create a list of lands which are based on the specifications.
-	 * 
-	 * - It will pick randomly a land from the list of lands to call
-	 * buy_map_land.
+	 * - It will create a random located land which are based on the
+	 * specifications.
 	 */
 	@Override
 	public Percept call(final ContextEntity caller, final LinkedList<Parameter> parameters)
@@ -104,6 +101,9 @@ public class BuySpecifiedLand implements CustomAction {
 		}
 	}
 
+	/**
+	 * get name to which will be used in the GOAL agent as action
+	 */
 	@Override
 	public String getName() {
 		return "buy_specified_land";
