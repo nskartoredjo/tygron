@@ -1,0 +1,1 @@
+start mvn -pl "!doc" clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dcobertura.skip -B -V

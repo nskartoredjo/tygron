@@ -20,7 +20,7 @@
 
     <groupId>tygron</groupId>
     <artifactId>contextvh</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.1.1</version>
     <name>${environmentname}env</name>
     <description>EIS-Tygron connector for the 2016 context project</description>
 
