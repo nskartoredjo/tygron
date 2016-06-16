@@ -23,12 +23,12 @@ import nl.tytech.util.JTSUtils;
  * Utility class for performing often used operations on map elements.
  * @author Max Groenenboom
  */
-public final class MapUtils {
+public class MapUtils {
 
 	/**
-	 * Private constructor.
+	 * Protected constructor.
 	 */
-	private MapUtils() {
+	protected MapUtils() {
 	}
 
 	protected static final MapType DEFAULT_MAPTYPE = MapType.MAQUETTE;
