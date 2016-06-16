@@ -29,7 +29,9 @@ import nl.tytech.core.net.serializable.MapLink;
 import nl.tytech.data.engine.item.Building;
 import nl.tytech.data.engine.item.Land;
 import nl.tytech.data.engine.item.Setting;
+import nl.tytech.data.engine.item.Terrain;
 import nl.tytech.data.engine.item.Zone;
+import nl.tytech.data.engine.item.Function.PlacementType;
 import nl.tytech.data.engine.serializable.Category;
 import nl.tytech.data.engine.serializable.MapType;
 import nl.tytech.util.JTSUtils;
@@ -62,17 +64,21 @@ public class BuySpecifiedLand implements CustomAction {
 				buyableLand = onlyBuildingLand(buyableLand);
 			else if (buyOnBuilding.intValue() != 2)
 				throw new TranslationException("buy_specified_land: wrong argument");
-
+						
 			List<Polygon> polygons = JTSUtils.getPolygons(buyableLand);
 			List<MultiPolygon> multipolygons = new ArrayList<MultiPolygon>();
 			
 			for (Polygon polygon : polygons) {
-				List<LineString> lineSegments = getLineSegments(polygon);
-				for (LineString lineString : lineSegments) {
-					multipolygons.addAll(createSpecifiedPolygons(polygon, lineString, depth.doubleValue(),
-							width.doubleValue(), distanceToRoad.doubleValue()));
+				if((depth.doubleValue() + width.doubleValue()) > 0) {
+					List<LineString> lineSegments = getLineSegments(polygon);
+					for (LineString lineString : lineSegments) {
+						List<MultiPolygon> specifiedMultiPolygon = createSpecifiedPolygons(polygon, lineString, depth.doubleValue(),
+								width.doubleValue(), distanceToRoad.doubleValue());
+						multipolygons.addAll(specifiedMultiPolygon);
+					}
+				} else {
+					multipolygons.add(JTSUtils.createMP(polygon));
 				}
-
 			}
 
 			if (multipolygons.isEmpty())
@@ -121,6 +127,15 @@ public class BuySpecifiedLand implements CustomAction {
 
 		MultiPolygon myLandsMP = JTSUtils.createMP(buyableLands);
 		return myLandsMP;
+	}
+	
+	public static MultiPolygon excludeWaterLand(final MultiPolygon buyableLand) {
+		MultiPolygon filteredLand = buyableLand;
+		for (Terrain terrain : EventManager.<Terrain> getItemMap(MapLink.TERRAINS)) {
+			if (terrain.getType().isWater())
+				filteredLand = JTSUtils.difference(buyableLand, terrain.getMultiPolygon(MAPTYPE));
+		}
+		return filteredLand;
 	}
 
 	public static MultiPolygon excludeBuildingLand(final MultiPolygon buyableLand) {
@@ -207,8 +222,7 @@ public class BuySpecifiedLand implements CustomAction {
 					boolean roadsCloseby = false;
 					for (Building building : buildings) {
 						if (building.getCategories().contains(Category.ROAD)
-								|| building.getCategories().contains(Category.INTERSECTION)
-								|| building.getCategories().contains(Category.BRIDGE)) {
+								|| building.getCategories().contains(Category.INTERSECTION)) {
 
 							if (JTSUtils.intersectsBorderIncluded(roadQueryPrepGeom,
 									building.getMultiPolygon(MAPTYPE))) {
