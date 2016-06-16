@@ -30,6 +30,13 @@ public class MapUtilsExt extends MapUtils {
 	protected MapUtilsExt() {
 		super();
 	}
+	
+	public static MultiPolygon getNonEmptyLand(MultiPolygon land, MultiPolygon filteredLand) {
+		if(filteredLand.isEmpty())
+			return land;
+		else
+			return filteredLand;
+	}
 
 	public static MultiPolygon getSpecifiedLand(final MultiPolygon land, final double depth, final double width,
 			final double distanceToRoad) throws TranslationException {
@@ -54,7 +61,7 @@ public class MapUtilsExt extends MapUtils {
 
 		Random random = new Random();
 		int randomPointer = random.nextInt(multipolygons.size() - 1);
-		
+
 		return multipolygons.get(randomPointer);
 	}
 
@@ -68,13 +75,14 @@ public class MapUtilsExt extends MapUtils {
 	 *            the zone ID.
 	 * @return the buyable land.
 	 */
-	public static MultiPolygon getLand(final String indicator, final Integer stakeholderID, final Integer zoneID) {
+	public static MultiPolygon getLand(final String indicator, final Integer stakeholderID, final Integer zoneID)
+			throws TranslationException {
 
 		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
 		MultiPolygon constructableLand = zone.getMultiPolygon();
 
 		constructableLand = excludeReservedLand(constructableLand);
-
+		
 		List<Geometry> buyableLands = new ArrayList<>();
 		for (Land land : EventManager.<Land> getItemMap(MapLink.LANDS)) {
 			if (!land.getOwnerID().equals(stakeholderID) && indicator.equals("buy_land")) {
@@ -89,42 +97,10 @@ public class MapUtilsExt extends MapUtils {
 				}
 			}
 		}
-
 		MultiPolygon myLandsMP = JTSUtils.createMP(buyableLands);
-		return myLandsMP;
+		return getNonEmptyLand(constructableLand, myLandsMP);
 	}
-
-	/**
-	 * Gets land which is buyable, excluding land from the stakeholder and
-	 * reserved land.
-	 * 
-	 * @param stakeholderID
-	 *            the stakeholder ID.
-	 * @param zoneID
-	 *            the zone ID.
-	 * @return the buyable land.
-	 */
-	public static MultiPolygon getBuyableLand(final Integer stakeholderID, final Integer zoneID) {
-
-		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
-		MultiPolygon constructableLand = zone.getMultiPolygon();
-
-		constructableLand = excludeReservedLand(constructableLand);
-
-		List<Geometry> buyableLands = new ArrayList<>();
-		for (Land land : EventManager.<Land> getItemMap(MapLink.LANDS)) {
-			if (!land.getOwnerID().equals(stakeholderID)) {
-				MultiPolygon mp = JTSUtils.intersection(constructableLand, land.getMultiPolygon());
-				if (JTSUtils.containsData(mp)) {
-					buyableLands.add(mp);
-				}
-			}
-		}
-
-		MultiPolygon myLandsMP = JTSUtils.createMP(buyableLands);
-		return myLandsMP;
-	}
-
+	
 	/**
 	 * Excludes reserved land from the given land.
 	 * 
@@ -133,13 +109,15 @@ public class MapUtilsExt extends MapUtils {
 	 * @return the difference from the given land and the reserved land.
 	 */
 	public static MultiPolygon excludeReservedLand(final MultiPolygon land) {
-		MultiPolygon filteredLand = land;
+		MultiPolygon filteredLand = JTSUtils.EMPTY;
+		
 		Setting reservedLandSetting = EventManager.getItem(MapLink.SETTINGS, Setting.Type.RESERVED_LAND);
 		MultiPolygon reservedLand = reservedLandSetting.getMultiPolygon();
+		
 		if (JTSUtils.containsData(reservedLand)) {
 			filteredLand = JTSUtils.difference(land, reservedLand);
 		}
-		return filteredLand;
+		return getNonEmptyLand(land, filteredLand);
 	}
 
 	/**
@@ -150,12 +128,12 @@ public class MapUtilsExt extends MapUtils {
 	 * @return the difference of the given land and the water areas.
 	 */
 	public static MultiPolygon excludeWaterLand(final MultiPolygon land) {
-		MultiPolygon filteredLand = land;
+		MultiPolygon filteredLand = JTSUtils.EMPTY;
 		for (Terrain terrain : EventManager.<Terrain> getItemMap(MapLink.TERRAINS)) {
 			if (terrain.getType().isWater())
 				filteredLand = JTSUtils.difference(land, terrain.getMultiPolygon(DEFAULT_MAPTYPE));
 		}
-		return filteredLand;
+		return getNonEmptyLand(land, filteredLand);
 	}
 
 	/**
@@ -169,7 +147,7 @@ public class MapUtilsExt extends MapUtils {
 	 */
 	public static MultiPolygon excludeBuildingLand(final MultiPolygon land) {
 
-		MultiPolygon filteredLand = land;
+		MultiPolygon filteredLand = JTSUtils.EMPTY;
 
 		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(land);
 		for (Building building : EventManager.<Building> getItemMap(MapLink.BUILDINGS)) {
@@ -177,8 +155,7 @@ public class MapUtilsExt extends MapUtils {
 				filteredLand = JTSUtils.difference(filteredLand, building.getMultiPolygon(DEFAULT_MAPTYPE));
 			}
 		}
-
-		return filteredLand;
+		return getNonEmptyLand(land, filteredLand);
 	}
 
 	/**
@@ -190,7 +167,7 @@ public class MapUtilsExt extends MapUtils {
 	 */
 	public static MultiPolygon confineBuildingLand(final MultiPolygon land) {
 
-		MultiPolygon filteredLand = land;
+		MultiPolygon filteredLand = JTSUtils.EMPTY;
 
 		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(land);
 		for (Building building : EventManager.<Building> getItemMap(MapLink.BUILDINGS)) {
@@ -198,8 +175,7 @@ public class MapUtilsExt extends MapUtils {
 				filteredLand = JTSUtils.intersection(filteredLand, building.getMultiPolygon(DEFAULT_MAPTYPE));
 			}
 		}
-
-		return filteredLand;
+		return getNonEmptyLand(land, filteredLand);
 	}
 
 	/**
@@ -209,7 +185,7 @@ public class MapUtilsExt extends MapUtils {
 	 *            the given polygon where the lines should be from.
 	 * @return a list of line strings.
 	 */
-	public static List<LineString> getLineSegments(final Polygon polygon) {
+	public static List<LineString> getLineSegments(final Polygon polygon) throws TranslationException {
 		List<LineString> lineSegments = new ArrayList<>();
 
 		for (int i = 0; i < polygon.getExteriorRing().getNumGeometries(); i++) {
@@ -227,6 +203,9 @@ public class MapUtilsExt extends MapUtils {
 				}
 			}
 		}
+
+		if (lineSegments.isEmpty())
+			throw new TranslationException("getLineSegments: no result");
 
 		return lineSegments;
 	}
@@ -252,14 +231,17 @@ public class MapUtilsExt extends MapUtils {
 	 * @return
 	 */
 	public static List<MultiPolygon> createSpecifiedPolygons(final Polygon polygon, final LineString lineString,
-			final double depth, final double width, final double distanceToRoad) {
+			final double depth, final double width, final double distanceToRoad) throws TranslationException {
+
 		List<MultiPolygon> specifiedPolygons = new ArrayList<MultiPolygon>();
 		List<Building> buildings = new ArrayList<>(EventManager.<Building> getItemMap(MapLink.BUILDINGS).values());
+
 		for (int c = 0; c < lineString.getCoordinates().length - 1; ++c) {
 
 			Coordinate c1 = lineString.getCoordinates()[c];
 			Coordinate c2 = lineString.getCoordinates()[c + 1];
 			int sectionsOnLine = (int) Math.floor(c1.distance(c2) / width);
+
 			if (sectionsOnLine <= 0) {
 				continue;
 			}
@@ -298,13 +280,16 @@ public class MapUtilsExt extends MapUtils {
 						continue;
 					}
 				}
-
 				MultiPolygon mp = JTSUtils.intersection(polygon, bufferedLine);
 				if (JTSUtils.containsData(mp)) {
 					specifiedPolygons.add(mp);
 				}
 			}
 		}
+
+		if (specifiedPolygons.isEmpty())
+			specifiedPolygons.add(JTSUtils.createMP(polygon));
+			
 		return specifiedPolygons;
 	}
 
