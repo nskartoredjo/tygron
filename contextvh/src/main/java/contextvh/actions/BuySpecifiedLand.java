@@ -47,6 +47,8 @@ import nl.tytech.util.logger.TLogger;
  * 
  * Special Thanks to Frank, which wrote the code where this action is based on.
  * 
+ * Land is a synonym for multi-polygon, where area is a synonym for polygon.
+ * 
  * @author Nando Kartoredjo
  */
 public class BuySpecifiedLand implements CustomAction {
@@ -59,7 +61,7 @@ public class BuySpecifiedLand implements CustomAction {
 	 * - It retrieves the values.
 	 * 
 	 * - within the parameter list. If there are more parameters, then it will
-	 * return a exception.
+	 * return an exception.
 	 * 
 	 * - It will create a land which is buyable.
 	 * 
@@ -72,7 +74,8 @@ public class BuySpecifiedLand implements CustomAction {
 	 * buy_map_land.
 	 */
 	@Override
-	public Percept call(ContextEntity caller, LinkedList<Parameter> parameters) throws TranslationException {
+	public Percept call(final ContextEntity caller, final LinkedList<Parameter> parameters)
+			throws TranslationException {
 		try {
 			Iterator<Parameter> params = parameters.iterator();
 			Number sID = ((Numeral) params.next()).getValue();
@@ -88,6 +91,12 @@ public class BuySpecifiedLand implements CustomAction {
 
 			MultiPolygon buyableLand = getBuyableLand(sID.intValue(), zoneID.intValue());
 
+			/**
+			 * Checks the buyOnBuilding value if: 0: the land will be excluded
+			 * form areas with buildings on it. 1: the land will contain areas
+			 * where buildings are on it. 2: the land will include the areas
+			 * where buildings are on it.
+			 */
 			if (buyOnBuilding.intValue() == 0)
 				buyableLand = excludeBuildingLand(buyableLand);
 			else if (buyOnBuilding.intValue() == 1)
@@ -143,7 +152,7 @@ public class BuySpecifiedLand implements CustomAction {
 	 *            the zone ID.
 	 * @return the buyable land.
 	 */
-	public static MultiPolygon getBuyableLand(Integer stakeholderID, Integer zoneID) {
+	public static MultiPolygon getBuyableLand(final Integer stakeholderID, final Integer zoneID) {
 
 		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
 		MultiPolygon constructableLand = zone.getMultiPolygon();
@@ -236,7 +245,7 @@ public class BuySpecifiedLand implements CustomAction {
 	 *            the given polygon where the lines should be from.
 	 * @return a list of line strings.
 	 */
-	public static List<LineString> getLineSegments(Polygon polygon) {
+	public static List<LineString> getLineSegments(final Polygon polygon) {
 		List<LineString> lineSegments = new ArrayList<>();
 
 		for (int i = 0; i < polygon.getExteriorRing().getNumGeometries(); i++) {
@@ -278,8 +287,8 @@ public class BuySpecifiedLand implements CustomAction {
 	 *            check will be skipped.
 	 * @return
 	 */
-	public static List<MultiPolygon> createSpecifiedPolygons(Polygon polygon, LineString lineString, double depth,
-			double width, double distanceToRoad) {
+	public static List<MultiPolygon> createSpecifiedPolygons(final Polygon polygon, final LineString lineString,
+			final double depth, final double width, final double distanceToRoad) {
 		List<MultiPolygon> specifiedPolygons = new ArrayList<MultiPolygon>();
 		List<Building> buildings = new ArrayList<>(EventManager.<Building> getItemMap(MapLink.BUILDINGS).values());
 		for (int c = 0; c < lineString.getCoordinates().length - 1; ++c) {
