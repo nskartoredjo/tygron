@@ -43,7 +43,7 @@ public class BuildSpecifiedBuilding implements CustomAction {
 					distanceToRoad.doubleValue());
 
 			LinkedList<Parameter> landParams = new LinkedList<Parameter>();
-			landParams.add(new Identifier(BuildingID.toString()));
+			landParams.add(new Numeral(BuildingID));
 			landParams.add(new Numeral(LEVEL));
 			landParams.add(new Function("multipolygon", new Identifier(buildableLand.toString())));
 
