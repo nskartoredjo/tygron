@@ -25,6 +25,15 @@ import nl.tytech.data.engine.item.Zone;
 import nl.tytech.data.engine.serializable.Category;
 import nl.tytech.util.JTSUtils;
 
+/**
+ * Utility class for performing often used operations on map elements.
+ * 
+ * Special Thanks to Frank, which wrote the code where these utilities are based
+ * on.
+ * 
+ * @author Nando Kartoredjo
+ *
+ */
 public class MapUtilsExt extends MapUtils {
 
 	/**

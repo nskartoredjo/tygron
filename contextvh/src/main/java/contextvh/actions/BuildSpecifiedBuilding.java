@@ -16,6 +16,20 @@ import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import nl.tytech.util.logger.TLogger;
 
+/**
+ * Extends the internal building_plan_construction action to allow the agent to
+ * specify additional specifications like: width and depth for the area, the
+ * zone of the area, and the distance to a road. The action takes care for the
+ * specified allocation of the area, delivering a multipolygon for the
+ * building_plan_construction action. It does return the percept from the
+ * building_plan_construction action.
+ * 
+ * Special Thanks to Frank, which wrote the code where this action is based on.
+ * 
+ * Land is a synonym for multi-polygon, where area is a synonym for polygon.
+ * 
+ * @author Nando Kartoredjo
+ */
 public class BuildSpecifiedBuilding implements CustomAction {
 
 	private final int LEVEL = 1;
