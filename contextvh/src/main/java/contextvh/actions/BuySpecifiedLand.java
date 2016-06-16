@@ -37,10 +37,40 @@ import nl.tytech.data.engine.serializable.MapType;
 import nl.tytech.util.JTSUtils;
 import nl.tytech.util.logger.TLogger;
 
+/**
+ * Extends the internal buy_map_land action to allow the agent to specify
+ * additional specifications like: width and depth for the area, the zone of the
+ * area, the price per square meter, and the distance to a road. The action
+ * takes care for the specified allocation of the area, delivering a
+ * multipolygon for the buy_map_land action. It does return the percept from the
+ * buy_map_land action.
+ * 
+ * Special Thanks to Frank, which wrote the code where this action is based on.
+ * 
+ * @author Nando Kartoredjo
+ */
 public class BuySpecifiedLand implements CustomAction {
 
 	private static final MapType MAPTYPE = MapType.MAQUETTE;
 
+	/**
+	 * this method includes multiple procedures:
+	 * 
+	 * - It retrieves the values.
+	 * 
+	 * - within the parameter list. If there are more parameters, then it will
+	 * return a exception.
+	 * 
+	 * - It will create a land which is buyable.
+	 * 
+	 * - Based on the parameter BuyOnBuilding, it allows to: exclude buildings,
+	 * include buildings, or only buy areas on buildings.
+	 * 
+	 * - It will create a list of lands which are based on the specifications.
+	 * 
+	 * - It will pick randomly a land from the list of lands to call
+	 * buy_map_land.
+	 */
 	@Override
 	public Percept call(ContextEntity caller, LinkedList<Parameter> parameters) throws TranslationException {
 		try {
@@ -64,16 +94,16 @@ public class BuySpecifiedLand implements CustomAction {
 				buyableLand = onlyBuildingLand(buyableLand);
 			else if (buyOnBuilding.intValue() != 2)
 				throw new TranslationException("buy_specified_land: wrong argument");
-						
+
 			List<Polygon> polygons = JTSUtils.getPolygons(buyableLand);
 			List<MultiPolygon> multipolygons = new ArrayList<MultiPolygon>();
-			
+
 			for (Polygon polygon : polygons) {
-				if((depth.doubleValue() + width.doubleValue()) > 0) {
+				if ((depth.doubleValue() + width.doubleValue()) > 0) {
 					List<LineString> lineSegments = getLineSegments(polygon);
 					for (LineString lineString : lineSegments) {
-						List<MultiPolygon> specifiedMultiPolygon = createSpecifiedPolygons(polygon, lineString, depth.doubleValue(),
-								width.doubleValue(), distanceToRoad.doubleValue());
+						List<MultiPolygon> specifiedMultiPolygon = createSpecifiedPolygons(polygon, lineString,
+								depth.doubleValue(), width.doubleValue(), distanceToRoad.doubleValue());
 						multipolygons.addAll(specifiedMultiPolygon);
 					}
 				} else {
@@ -86,7 +116,7 @@ public class BuySpecifiedLand implements CustomAction {
 
 			Random random = new Random();
 			int randomPointer = random.nextInt(multipolygons.size() - 1);
-			
+
 			LinkedList<Parameter> landParams = new LinkedList<Parameter>();
 			landParams.add(new Function("multipolygon", new Identifier(multipolygons.get(randomPointer).toString())));
 			landParams.add(new Numeral(price));
@@ -103,6 +133,16 @@ public class BuySpecifiedLand implements CustomAction {
 		return "buy_specified_land";
 	}
 
+	/**
+	 * Gets land which is buyable, excluding land from the stakeholder and
+	 * reserved land.
+	 * 
+	 * @param stakeholderID
+	 *            the stakeholder ID.
+	 * @param zoneID
+	 *            the zone ID.
+	 * @return the buyable land.
+	 */
 	public static MultiPolygon getBuyableLand(Integer stakeholderID, Integer zoneID) {
 
 		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
@@ -128,21 +168,37 @@ public class BuySpecifiedLand implements CustomAction {
 		MultiPolygon myLandsMP = JTSUtils.createMP(buyableLands);
 		return myLandsMP;
 	}
-	
-	public static MultiPolygon excludeWaterLand(final MultiPolygon buyableLand) {
-		MultiPolygon filteredLand = buyableLand;
+
+	/**
+	 * Excludes land which contains water from the given land.
+	 * 
+	 * @param land
+	 *            the land which should be excluded form water.
+	 * @return the difference of the given land and the water areas.
+	 */
+	public static MultiPolygon excludeWaterLand(final MultiPolygon land) {
+		MultiPolygon filteredLand = land;
 		for (Terrain terrain : EventManager.<Terrain> getItemMap(MapLink.TERRAINS)) {
 			if (terrain.getType().isWater())
-				filteredLand = JTSUtils.difference(buyableLand, terrain.getMultiPolygon(MAPTYPE));
+				filteredLand = JTSUtils.difference(land, terrain.getMultiPolygon(MAPTYPE));
 		}
 		return filteredLand;
 	}
 
-	public static MultiPolygon excludeBuildingLand(final MultiPolygon buyableLand) {
+	/**
+	 * excludes land with buildings on it from the given land.
+	 * 
+	 * @param land
+	 *            the land which should be excluded from areas with buildings on
+	 *            it.
+	 * @return the difference of the given land and the areas containing
+	 *         buildings.
+	 */
+	public static MultiPolygon excludeBuildingLand(final MultiPolygon land) {
 
-		MultiPolygon filteredLand = buyableLand;
+		MultiPolygon filteredLand = land;
 
-		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(buyableLand);
+		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(land);
 		for (Building building : EventManager.<Building> getItemMap(MapLink.BUILDINGS)) {
 			if (prepMyLand.intersects(building.getMultiPolygon(MAPTYPE))) {
 				filteredLand = JTSUtils.difference(filteredLand, building.getMultiPolygon(MAPTYPE));
@@ -152,11 +208,18 @@ public class BuySpecifiedLand implements CustomAction {
 		return filteredLand;
 	}
 
-	public static MultiPolygon onlyBuildingLand(final MultiPolygon buyableLand) {
+	/**
+	 * filters land so that it only contains areas where buildings are on it.
+	 * 
+	 * @param land
+	 *            the land that should be filtered.
+	 * @return land which only contains buildings.
+	 */
+	public static MultiPolygon onlyBuildingLand(final MultiPolygon land) {
 
-		MultiPolygon filteredLand = buyableLand;
+		MultiPolygon filteredLand = land;
 
-		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(buyableLand);
+		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(land);
 		for (Building building : EventManager.<Building> getItemMap(MapLink.BUILDINGS)) {
 			if (prepMyLand.intersects(building.getMultiPolygon(MAPTYPE))) {
 				filteredLand = JTSUtils.intersection(filteredLand, building.getMultiPolygon(MAPTYPE));
@@ -166,6 +229,13 @@ public class BuySpecifiedLand implements CustomAction {
 		return filteredLand;
 	}
 
+	/**
+	 * Creates line segments based on the given polygon.
+	 * 
+	 * @param polygon
+	 *            the given polygon where the lines should be from.
+	 * @return a list of line strings.
+	 */
 	public static List<LineString> getLineSegments(Polygon polygon) {
 		List<LineString> lineSegments = new ArrayList<>();
 
@@ -188,6 +258,26 @@ public class BuySpecifiedLand implements CustomAction {
 		return lineSegments;
 	}
 
+	/**
+	 * Creates new polygons on the edges from the given polygon, based on a
+	 * given width on the lineString, and a depth into the polygon, resulting in
+	 * a rectangle.
+	 * 
+	 * @param polygon
+	 *            the polygon where the new polygon should be a subspace of.
+	 * @param lineString
+	 *            The line where the polygon should touch with.
+	 * @param depth
+	 *            the specified double depth If zero in addition to width, this
+	 *            specification will be skipped.
+	 * @param width
+	 *            the specified double width. If zero in addition to depth, this
+	 *            specification will be skipped.
+	 * @param distanceToRoad
+	 *            the distance the new area should be from a road. If zero, this
+	 *            check will be skipped.
+	 * @return
+	 */
 	public static List<MultiPolygon> createSpecifiedPolygons(Polygon polygon, LineString lineString, double depth,
 			double width, double distanceToRoad) {
 		List<MultiPolygon> specifiedPolygons = new ArrayList<MultiPolygon>();
