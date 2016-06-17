@@ -27,42 +27,43 @@ import nl.tytech.util.JTSUtils;
 
 /**
  * Utility class for performing often used operations on map elements.
- * 
+ *
  * Special Thanks to Frank, which wrote the code where these utilities are based
  * on.
- * 
+ *
  * @author Nando Kartoredjo
  *
  */
 public class MapUtilsExt extends MapUtils {
 
 	/**
-	 * protected constructor
+	 * Protected constructor.
 	 */
 	protected MapUtilsExt() {
 		super();
 	}
 
 	/**
-	 * Test if a filtered land is empty, if so, use the alternative land
-	 * 
+	 * Test if a filtered land is empty, if so, use the alternative land.
+	 *
 	 * @param land
-	 *            the alternative land
+	 *            The alternative land.
 	 * @param filteredLand
-	 *            the filtered land which may be empty
-	 * @return the filteredLand only if it is not empty, otherwise return land
+	 *            The filtered land which may be empty.
+	 * @return The filteredLand only if it is not empty, otherwise return land.
 	 */
-	public static MultiPolygon getNonEmptyLand(MultiPolygon land, MultiPolygon filteredLand) {
-		if (filteredLand.isEmpty())
+	public static MultiPolygon getNonEmptyLand(final MultiPolygon land, final MultiPolygon filteredLand) {
+		if (filteredLand.isEmpty()) {
 			return land;
-		else
+		} else {
 			return filteredLand;
+		}
 	}
 
 	/**
-	 * uses the land to create sub-polygons based on the specifications. A
+	 * Uses the land to create sub-polygons based on the specifications. A
 	 * random located land will be returned.
-	 * 
+	 *
 	 * @param land
 	 *            The land which should be the base to create the smaller
 	 *            specified sub-polygons.
@@ -72,8 +73,9 @@ public class MapUtilsExt extends MapUtils {
 	 *            The width specification.
 	 * @param distanceToRoad
 	 *            The DistanceToRoad specification.
-	 * @return one multi-polygon randomly collected from a list of sub-polygons.
+	 * @return One multi-polygon randomly collected from a list of sub-polygons.
 	 * @throws TranslationException
+	 *             If the new created land list is empty.
 	 */
 	public static MultiPolygon getSpecifiedLand(final MultiPolygon land, final double depth, final double width,
 			final double distanceToRoad) throws TranslationException {
@@ -84,7 +86,8 @@ public class MapUtilsExt extends MapUtils {
 			if ((depth + width) > 0) {
 				List<LineString> lineSegments = MapUtilsExt.getLineSegments(polygon);
 				for (LineString lineString : lineSegments) {
-					List<MultiPolygon> specifiedMultiPolygon = MapUtilsExt.createSpecifiedPolygons(polygon, lineString,
+					List<MultiPolygon> specifiedMultiPolygon =
+							MapUtilsExt.createSpecifiedPolygons(polygon, lineString,
 							depth, width, distanceToRoad);
 					multipolygons.addAll(specifiedMultiPolygon);
 				}
@@ -93,8 +96,9 @@ public class MapUtilsExt extends MapUtils {
 			}
 		}
 
-		if (multipolygons.isEmpty())
+		if (multipolygons.isEmpty()) {
 			throw new TranslationException("getSpecifiedLand: no result");
+		}
 
 		Random random = new Random();
 		int randomPointer = random.nextInt(multipolygons.size() - 1);
@@ -105,18 +109,17 @@ public class MapUtilsExt extends MapUtils {
 	/**
 	 * Gets land which is buyable, excluding land from the stakeholder and
 	 * reserved land.
-	 * 
+	 *
 	 * @param indicator
 	 *            The indicator indicates if it should use the land from the
 	 *            stakeholder or not, based on the action it got called from.
 	 * @param stakeholderID
-	 *            the stakeholder ID.
+	 *            The stakeholder ID.
 	 * @param zoneID
-	 *            the zone ID.
-	 * @return the buyable land.
+	 *            The zone ID.
+	 * @return The buyable land.
 	 */
-	public static MultiPolygon getLand(final String indicator, final Integer stakeholderID, final Integer zoneID)
-			throws TranslationException {
+	public static MultiPolygon getLand(final String indicator, final Integer stakeholderID, final Integer zoneID) {
 
 		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
 		MultiPolygon constructableLand = zone.getMultiPolygon();
@@ -124,7 +127,7 @@ public class MapUtilsExt extends MapUtils {
 		constructableLand = excludeReservedLand(constructableLand);
 
 		List<Geometry> buyableLands = new ArrayList<>();
-		for (Land land : EventManager.<Land> getItemMap(MapLink.LANDS)) {
+		for (Land land : EventManager.<Land>getItemMap(MapLink.LANDS)) {
 			if (!land.getOwnerID().equals(stakeholderID) && indicator.equals("buy_land")) {
 				MultiPolygon mp = JTSUtils.intersection(constructableLand, land.getMultiPolygon());
 				if (JTSUtils.containsData(mp)) {
@@ -143,10 +146,10 @@ public class MapUtilsExt extends MapUtils {
 
 	/**
 	 * Excludes reserved land from the given land.
-	 * 
+	 *
 	 * @param land
-	 *            the land which should be excluded from reserved land.
-	 * @return the difference from the given land and the reserved land.
+	 *            The land which should be excluded from reserved land.
+	 * @return The difference from the given land and the reserved land.
 	 */
 	public static MultiPolygon excludeReservedLand(final MultiPolygon land) {
 		MultiPolygon filteredLand = JTSUtils.EMPTY;
@@ -162,23 +165,24 @@ public class MapUtilsExt extends MapUtils {
 
 	/**
 	 * Excludes land which contains water from the given land.
-	 * 
+	 *
 	 * @param land
-	 *            the land which should be excluded form water.
-	 * @return the difference of the given land and the water areas.
+	 *            The land which should be excluded form water.
+	 * @return The difference of the given land and the water areas.
 	 */
 	public static MultiPolygon excludeWaterLand(final MultiPolygon land) {
 		MultiPolygon filteredLand = JTSUtils.EMPTY;
-		for (Terrain terrain : EventManager.<Terrain> getItemMap(MapLink.TERRAINS)) {
-			if (terrain.getType().isWater())
+		for (Terrain terrain : EventManager.<Terrain>getItemMap(MapLink.TERRAINS)) {
+			if (terrain.getType().isWater()) {
 				filteredLand = JTSUtils.difference(land, terrain.getMultiPolygon(DEFAULT_MAPTYPE));
+			}
 		}
 		return getNonEmptyLand(land, filteredLand);
 	}
 
 	/**
 	 * excludes land with buildings on it from the given land.
-	 * 
+	 *
 	 * @param land
 	 *            the land which should be excluded from areas with buildings on
 	 *            it.
@@ -190,29 +194,31 @@ public class MapUtilsExt extends MapUtils {
 		MultiPolygon filteredLand = JTSUtils.EMPTY;
 
 		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(land);
-		for (Building building : EventManager.<Building> getItemMap(MapLink.BUILDINGS)) {
+		for (Building building : EventManager.<Building>getItemMap(MapLink.BUILDINGS)) {
 			if (prepMyLand.intersects(building.getMultiPolygon(DEFAULT_MAPTYPE))) {
-				filteredLand = JTSUtils.difference(filteredLand, building.getMultiPolygon(DEFAULT_MAPTYPE));
+				filteredLand = JTSUtils.difference(filteredLand,
+						building.getMultiPolygon(DEFAULT_MAPTYPE));
 			}
 		}
 		return getNonEmptyLand(land, filteredLand);
 	}
 
 	/**
-	 * filters land so that it only contains areas where buildings are on it.
-	 * 
+	 * Filters land so that it only contains areas where buildings are on it.
+	 *
 	 * @param land
-	 *            the land that should be filtered.
-	 * @return land which only contains buildings.
+	 *            The land that should be filtered.
+	 * @return Land which only contains buildings.
 	 */
 	public static MultiPolygon confineBuildingLand(final MultiPolygon land) {
 
 		MultiPolygon filteredLand = JTSUtils.EMPTY;
 
 		PreparedGeometry prepMyLand = PreparedGeometryFactory.prepare(land);
-		for (Building building : EventManager.<Building> getItemMap(MapLink.BUILDINGS)) {
+		for (Building building : EventManager.<Building>getItemMap(MapLink.BUILDINGS)) {
 			if (prepMyLand.intersects(building.getMultiPolygon(DEFAULT_MAPTYPE))) {
-				filteredLand = JTSUtils.intersection(filteredLand, building.getMultiPolygon(DEFAULT_MAPTYPE));
+				filteredLand = JTSUtils.intersection(filteredLand,
+						building.getMultiPolygon(DEFAULT_MAPTYPE));
 			}
 		}
 		return getNonEmptyLand(land, filteredLand);
@@ -220,10 +226,12 @@ public class MapUtilsExt extends MapUtils {
 
 	/**
 	 * Creates line segments based on the given polygon.
-	 * 
+	 *
 	 * @param polygon
-	 *            the given polygon where the lines should be from.
-	 * @return a list of line strings.
+	 *            The given polygon where the lines should be from.
+	 * @return A list of line strings.
+	 * @throws TranslationException
+	 *             if the line segment list is empty.
 	 */
 	public static List<LineString> getLineSegments(final Polygon polygon) throws TranslationException {
 		List<LineString> lineSegments = new ArrayList<>();
@@ -244,8 +252,9 @@ public class MapUtilsExt extends MapUtils {
 			}
 		}
 
-		if (lineSegments.isEmpty())
+		if (lineSegments.isEmpty()) {
 			throw new TranslationException("getLineSegments: no result");
+		}
 
 		return lineSegments;
 	}
@@ -254,27 +263,29 @@ public class MapUtilsExt extends MapUtils {
 	 * Creates new polygons on the edges from the given polygon, based on a
 	 * given width on the lineString, and a depth into the polygon, resulting in
 	 * a rectangle.
-	 * 
+	 *
 	 * @param polygon
-	 *            the polygon where the new polygon should be a subspace of.
+	 *            The polygon where the new polygon should be a subspace of.
 	 * @param lineString
 	 *            The line where the polygon should touch with.
 	 * @param depth
-	 *            the specified double depth If zero in addition to width, this
+	 *            The specified double depth If zero in addition to width, this
 	 *            specification will be skipped.
 	 * @param width
-	 *            the specified double width. If zero in addition to depth, this
+	 *            The specified double width. If zero in addition to depth, this
 	 *            specification will be skipped.
 	 * @param distanceToRoad
-	 *            the distance the new area should be from a road. If zero, this
+	 *            The distance the new area should be from a road. If zero, this
 	 *            check will be skipped.
-	 * @return
+	 * @return The specified multi-polygon.
 	 */
-	public static List<MultiPolygon> createSpecifiedPolygons(final Polygon polygon, final LineString lineString,
-			final double depth, final double width, final double distanceToRoad) throws TranslationException {
+	public static List<MultiPolygon> createSpecifiedPolygons(final Polygon polygon,
+			final LineString lineString, final double depth, final double width,
+			final double distanceToRoad) {
 
 		List<MultiPolygon> specifiedPolygons = new ArrayList<MultiPolygon>();
-		List<Building> buildings = new ArrayList<>(EventManager.<Building> getItemMap(MapLink.BUILDINGS).values());
+		List<Building> buildings = new ArrayList<>(EventManager.<Building>
+			getItemMap(MapLink.BUILDINGS).values());
 
 		for (int c = 0; c < lineString.getCoordinates().length - 1; ++c) {
 
@@ -293,21 +304,24 @@ public class MapUtilsExt extends MapUtils {
 			for (int s = 0; s < sectionsOnLine; ++s) {
 
 				Coordinate nc1 = new Coordinate(s * vec.getX() + c1.x, s * vec.getY() + c1.y);
-				Coordinate nc2 = new Coordinate((s + 1) * vec.getX() + c1.x, (s + 1) * vec.getY() + c1.y);
+				Coordinate nc2 = new Coordinate((s + 1) * vec.getX() + c1.x, (s + 1)
+						* vec.getY() + c1.y);
 
-				LineString segment = JTSUtils.sourceFactory.createLineString(new Coordinate[] { nc1, nc2 });
+				LineString segment = JTSUtils.sourceFactory.createLineString(new Coordinate[]
+						{nc1, nc2});
 
 				Geometry bufferedLine = JTSUtils.bufferSimple(segment, depth);
 
 				if (distanceToRoad > 0) {
 
 					Geometry roadQueryGeometry = JTSUtils.bufferSimple(segment, distanceToRoad);
-					PreparedGeometry roadQueryPrepGeom = PreparedGeometryFactory.prepare(roadQueryGeometry);
+					PreparedGeometry roadQueryPrepGeom = PreparedGeometryFactory.
+							prepare(roadQueryGeometry);
 
 					boolean roadsCloseby = false;
 					for (Building building : buildings) {
 						if (building.getCategories().contains(Category.ROAD)
-								|| building.getCategories().contains(Category.INTERSECTION)) {
+							|| building.getCategories().contains(Category.INTERSECTION)) {
 
 							if (JTSUtils.intersectsBorderIncluded(roadQueryPrepGeom,
 									building.getMultiPolygon(DEFAULT_MAPTYPE))) {
@@ -327,8 +341,9 @@ public class MapUtilsExt extends MapUtils {
 			}
 		}
 
-		if (specifiedPolygons.isEmpty())
+		if (specifiedPolygons.isEmpty()) {
 			specifiedPolygons.add(JTSUtils.createMP(polygon));
+		}
 
 		return specifiedPolygons;
 	}

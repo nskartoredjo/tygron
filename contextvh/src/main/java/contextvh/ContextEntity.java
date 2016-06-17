@@ -22,9 +22,6 @@ public class ContextEntity extends tygronenv.TygronEntityImpl {
 
 	private ActionContainer customActions = new ActionContainer();
 
-
-
-
 	/**
 	 * Create new Tygron entity. It will report to env when the entity is ready
 	 * to run. This happens when initial percepts have been prepared and the

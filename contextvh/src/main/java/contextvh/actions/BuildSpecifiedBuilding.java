@@ -23,51 +23,54 @@ import nl.tytech.util.logger.TLogger;
  * specified allocation of the area, delivering a multipolygon for the
  * building_plan_construction action. It does return the percept from the
  * building_plan_construction action.
- * 
+ *
  * Special Thanks to Frank, which wrote the code where this action is based on.
- * 
+ *
  * Land is a synonym for multi-polygon, where area is a synonym for polygon.
- * 
+ *
  * @author Nando Kartoredjo
  */
 public class BuildSpecifiedBuilding implements CustomAction {
 
-	private final int LEVEL = 1;
+	protected static final int LEVEL = 1;
 
 	/**
-	 * this method includes multiple procedures:
-	 * 
+	 * This method includes multiple procedures:
+	 *
 	 * - It retrieves the parameter values.
-	 * 
+	 *
 	 * - If there are more parameters, then it will return an exception.
-	 * 
+	 *
 	 * - It will create a land which is buildable.
-	 * 
+	 *
 	 * - It will create a random located land which are based on the
 	 * specifications.
 	 */
 	@Override
-	public Percept call(ContextEntity caller, LinkedList<Parameter> parameters) throws TranslationException {
+	public Percept call(final ContextEntity caller, final LinkedList<Parameter> parameters)
+			throws TranslationException {
 		try {
 			Iterator<Parameter> params = parameters.iterator();
 			Number sID = ((Numeral) params.next()).getValue();
 			Number zoneID = ((Numeral) params.next()).getValue();
-			Number BuildingID = ((Numeral) params.next()).getValue();
+			Number buildingID = ((Numeral) params.next()).getValue();
 			Number depth = ((Numeral) params.next()).getValue();
 			Number width = ((Numeral) params.next()).getValue();
 			Number distanceToRoad = ((Numeral) params.next()).getValue();
 
-			if (params.hasNext())
+			if (params.hasNext()) {
 				throw new TranslationException("buy_specified_land: to many arguments");
+			}
 
-			MultiPolygon buildableLand = MapUtilsExt.getLand("build_building", sID.intValue(), zoneID.intValue());
+			MultiPolygon buildableLand = MapUtilsExt.getLand("build_building", sID.intValue(),
+					zoneID.intValue());
 
 			buildableLand = MapUtilsExt.excludeBuildingLand(buildableLand);
-			buildableLand = MapUtilsExt.getSpecifiedLand(buildableLand, depth.doubleValue(), width.doubleValue(),
-					distanceToRoad.doubleValue());
+			buildableLand = MapUtilsExt.getSpecifiedLand(buildableLand, depth.doubleValue(),
+					width.doubleValue(), distanceToRoad.doubleValue());
 
 			LinkedList<Parameter> landParams = new LinkedList<Parameter>();
-			landParams.add(new Numeral(BuildingID));
+			landParams.add(new Numeral(buildingID));
 			landParams.add(new Numeral(LEVEL));
 			landParams.add(new Function("multipolygon", new Identifier(buildableLand.toString())));
 
@@ -79,7 +82,7 @@ public class BuildSpecifiedBuilding implements CustomAction {
 	}
 
 	/**
-	 * get name to which will be used in the GOAL agent as action
+	 * Get name to which will be used in the GOAL agent as action.
 	 */
 	@Override
 	public String getName() {
