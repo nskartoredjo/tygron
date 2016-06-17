@@ -1,7 +1,6 @@
 package contextvh.actions;
 
 import contextvh.ContextEntity;
-import eis.iilang.ParameterList;
 import eis.iilang.Percept;
 
 /**
@@ -15,7 +14,7 @@ public interface RelevantAreasAction extends CustomAction {
 	 * @param caller The ContextEntity representing the agent that called the action.
 	 * @param parameters The parameters the getRelevantAreas action was called with.
 	 */
-	void internalCall(Percept createdPercept, ContextEntity caller, ParameterList parameters);
+	void internalCall(Percept createdPercept, ContextEntity caller, Parameters parameters);
 
 	/**
 	 * The internal name for the action, it is used by GetRelevantAreas.

@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import contextvh.translators.GroundLayerType2J;
 import eis.eis2java.exception.TranslationException;
 import eis.iilang.Identifier;
 import nl.tytech.data.engine.item.Building.GroundLayerType;
 
 /**
  * This class containes unit tests for the GroundLaterType class.
+ *
  * @author Rico
  *
  */
@@ -20,12 +20,12 @@ public class GroundLayerType2JTest {
 	private final GroundLayerType surfaceType = GroundLayerType.SURFACE;
 	private final GroundLayerType undergroundType = GroundLayerType.UNDERGROUND;
 
-
 	/**
 	 * Test if translating with a bad param throws a
 	 * {@link TranslationException}.
+	 *
 	 * @throws TranslationException
-	 * 		A translate exception.
+	 *             A translate exception.
 	 */
 	@Test(expected = TranslationException.class)
 	public void testBadWeather() throws TranslationException {
@@ -34,10 +34,11 @@ public class GroundLayerType2JTest {
 	}
 
 	/**
-	 * Test if translating with a good param (surface),
-	 * in lower case gives us a surface.
+	 * Test if translating with a good param (surface), in lower case gives us a
+	 * surface.
+	 *
 	 * @throws TranslationException
-	 * 		A translate exception.
+	 *             A translate exception.
 	 */
 	@Test
 	public void testGoodWeatherSurface() throws TranslationException {
@@ -45,11 +46,13 @@ public class GroundLayerType2JTest {
 		GroundLayerType type = translator.translate(parameter);
 		assertEquals(type, surfaceType);
 	}
+
 	/**
-	 * Test if translating with a good param (underground),
-	 * in lower case gives us a underground.
+	 * Test if translating with a good param (underground), in lower case gives
+	 * us a underground.
+	 *
 	 * @throws TranslationException
-	 * 		A translate exception.
+	 *             A translate exception.
 	 */
 
 	@Test

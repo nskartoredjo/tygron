@@ -1,6 +1,9 @@
 language: java
 jdk:
 - oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
 before_install:
 # add eishub/tygron to remote as upstream
 - git remote add upstream https://github.com/eishub/tygron.git
@@ -24,5 +27,6 @@ script:
 #- cd ..
 # run cobertura only in environment build fails when coverage is too low
 #- mvn cobertura:check
+
 notifications:
   slack: $slack_token

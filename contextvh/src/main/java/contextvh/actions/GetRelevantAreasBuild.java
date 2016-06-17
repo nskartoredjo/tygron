@@ -1,6 +1,7 @@
 package contextvh.actions;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import contextvh.util.CoordinateUtils;
 import contextvh.util.MapUtils;
 import eis.eis2java.exception.TranslationException;
 import eis.iilang.Identifier;
+import eis.iilang.Numeral;
 import eis.iilang.Parameter;
 import eis.iilang.ParameterList;
 import eis.iilang.Percept;
@@ -26,7 +28,11 @@ import nl.tytech.util.logger.TLogger;
  */
 public class GetRelevantAreasBuild implements RelevantAreasAction {
 
-	private static GetRelevantAreas parent;
+	private static final int DEFAULT_MAX_POLYS = 10;
+	private static final double DEFAULT_MIN_AREA = 200;
+	private static final double DEFAULT_MAX_AREA = 200;
+
+	private GetRelevantAreas parent;
 
 	/**
 	 * Create a new <code>GetRelevantAreasBuild</code> action.
@@ -56,18 +62,30 @@ public class GetRelevantAreasBuild implements RelevantAreasAction {
 
 	@Override
 	public void internalCall(final Percept createdPercept,
-			final ContextEntity caller, final ParameterList parameters) {
+			final ContextEntity caller, final Parameters parameters) {
 		MultiPolygon constructableLand = getUsableArea(caller, parameters);
-
-		final int minArea = 200, maxArea = 2000;
-		final int maxPolys = 15;
+		// Parse parameters
+		int maxPolys = DEFAULT_MAX_POLYS;
+		double minArea = DEFAULT_MIN_AREA;
+		double maxArea = DEFAULT_MAX_AREA;
+		if (parameters.containsKey("amount")) {
+			maxPolys = ((Numeral) parameters.get("amount").getFirst()).getValue().intValue();
+		}
+		if (parameters.containsKey("area")) {
+			minArea = ((Numeral) parameters.get("area").getFirst()).getValue().doubleValue();
+			maxArea = ((Numeral) parameters.get("area").getLast()).getValue().doubleValue();
+		}
+		if (minArea >= maxArea) {
+			throw new IllegalArgumentException("min area must be smaller than max area");
+		}
+		// Calculate polygons
 		final int bufferUp = 5, bufferDown = -10;
 		int numPolys = 0;
 		final ParameterList results = new ParameterList();
 		for (Polygon poly: JTSUtils.getPolygons(constructableLand)) {
 			final List<Polygon> listPolygon = JTSUtils.getTriangles(poly, minArea);
 			for (Geometry geom : listPolygon) {
-				if (numPolys > maxPolys) {
+				if (numPolys >= maxPolys) {
 					break;
 				}
 				geom = createNewPolygon(geom);
@@ -96,13 +114,26 @@ public class GetRelevantAreasBuild implements RelevantAreasAction {
 	 * @param parameters The parameters provided to the action.
 	 * @return The multiPolygon that can be built on.
 	 */
-	protected MultiPolygon getUsableArea(final ContextEntity caller, final ParameterList parameters) {
+	protected MultiPolygon getUsableArea(final ContextEntity caller, final Parameters parameters) {
 		// Get a MultiPolygon of all lands combined.
 		Integer connectionID = caller.getSlotConnection().getConnectionID();
-
-		final Integer stakeholderID = caller.getStakeholder().getID();
+		// Get the stakeholder form the parameters or default to caller
+		Integer stakeholderID = caller.getStakeholder().getID();
+		if (parameters.containsKey("stakeholder")) {
+			stakeholderID = ((Numeral) parameters.get("stakeholder").getFirst()).getValue().intValue();
+		}
+		// Calculate multipolygon
 		MultiPolygon constructableLand = MapUtils.getStakeholderLands(connectionID, stakeholderID);
-
+		// Intersect with zones if there is a zone parameter
+		if (parameters.containsKey("zones")) {
+			Iterator<Parameter> zoneParam = parameters.get("zones").iterator();
+			List<Integer> zones = new LinkedList<Integer>();
+			while (zoneParam.hasNext()) {
+				zones.add((int) ((Numeral) zoneParam.next()).getValue());
+			}
+			constructableLand = JTSUtils.createMP(constructableLand
+					.intersection(MapUtils.getZonesCombined(connectionID, zones)));
+		}
 		// Remove all pieces of land that cannot be build on (water).
 		constructableLand = MapUtils.removeWater(connectionID, constructableLand);
 
@@ -110,7 +141,7 @@ public class GetRelevantAreasBuild implements RelevantAreasAction {
 		constructableLand = MapUtils.removeReservedLand(connectionID, constructableLand);
 
 		// Remove all pieces of occupied land.
-		constructableLand = MapUtils.removeBuildings(connectionID, constructableLand);
+		constructableLand = MapUtils.removeBuildings(connectionID, stakeholderID, constructableLand);
 
 		return constructableLand;
 	}

@@ -42,7 +42,8 @@ public class J2Land implements Java2Parameter<Land> {
 				translator.translate2Parameter(b.getMultiPolygon())[0],
 				pl,
 				new Numeral(b.getMultiPolygon().getArea())
-				)};
+			)
+		};
 	}
 
 	@Override

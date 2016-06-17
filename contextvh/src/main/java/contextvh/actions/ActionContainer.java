@@ -24,6 +24,7 @@ public class ActionContainer extends HashMap<String, CustomAction> {
 		addAction(new GetRelevantAreas());
 		addAction(new BuySpecifiedLand());
 		addAction(new BuildSpecifiedBuilding());
+		addAction(new FilterPercepts());
 	}
 
 	/**

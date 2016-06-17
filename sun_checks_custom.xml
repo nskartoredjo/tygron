@@ -74,6 +74,14 @@
        <property name="message" value="Line has trailing spaces."/>
     </module>
 
+	<!-- Checks for lines with space indentation            -->
+	<!-- Space indentation should not be used as the entire -->
+	<!-- existing project uses tab indentation.             -->
+	<module name="RegexpSingleline">
+		<property name="format" value="^[ ]{2,}"/>
+		<property name="message" value="Too many leading spaces."/>
+	</module>
+
     <!-- Checks for Headers                                -->
     <!-- See http://checkstyle.sf.net/config_header.html   -->
     <!-- <module name="Header"> -->
