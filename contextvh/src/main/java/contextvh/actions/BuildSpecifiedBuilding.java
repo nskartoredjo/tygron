@@ -61,7 +61,7 @@ public class BuildSpecifiedBuilding implements CustomAction {
 			if (params.hasNext()) {
 				throw new TranslationException("buy_specified_land: to many arguments");
 			}
-
+			
 			MultiPolygon buildableLand = MapUtilsExt.getLand("build_building", sID.intValue(),
 					zoneID.intValue());
 

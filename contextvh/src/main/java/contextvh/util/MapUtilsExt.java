@@ -121,6 +121,7 @@ public class MapUtilsExt extends MapUtils {
 	 */
 	public static MultiPolygon getLand(final String indicator, final Integer stakeholderID, final Integer zoneID) {
 
+		System.out.println("reached");
 		Zone zone = EventManager.getItem(MapLink.ZONES, zoneID);
 		MultiPolygon constructableLand = zone.getMultiPolygon();
 
